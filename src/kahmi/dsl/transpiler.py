@@ -59,17 +59,22 @@ class Transpiler:
       col_offset=node.loc.colno)
 
     if node.body:
-      yield pyast.Assign(targets=[util.name_expr('value', pyast.Store())], value=invoke_method)
+      value_name = func_name + '_' + self.context_var_name + '_arg'
+      yield pyast.Assign(targets=[util.name_expr(value_name, pyast.Store())], value=invoke_method)
+
+      # If the value appears to be a context manager, enter it's context before executing
+      # the body of the call.
+      yield from util.compile_snippet(
+        f'if hasattr({value_name}, "__enter__"):\n'
+        f'  with {value_name}:\n'
+        f'    {func_name}({value_name})\n'
+        f'else:\n'
+        f'  {func_name}({value_name})\n',
+        lineno=node.loc.lineno,
+        col_offset=node.loc.colno)
+
     else:
       yield pyast.Expr(invoke_method)
-
-    if node.body:
-      yield pyast.Expr(pyast.Call(
-        func=util.name_expr(func_name, pyast.Load()),
-        args=[util.name_expr('value', pyast.Load())],
-        keywords=[],
-        lineno=node.loc.lineno,
-        col_offset=node.loc.colno))
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.AST]:
     target = self.transpile_target(self.context_var_name, node.target, pyast.Store())

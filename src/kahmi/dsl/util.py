@@ -71,3 +71,27 @@ def name_expr(
     node.col_offset = col_offset
   ast.fix_missing_locations(node)
   return node
+
+
+def compile_snippet(snippet: str, lineno: int, col_offset: int, mode: str = 'exec') -> t.List[ast.AST]:
+  """
+  Compile a snippet into a Python AST.
+  """
+
+  node = ast.parse(snippet, filename='<input>', mode=mode)
+
+  # Will be fixed later down the road with #ast.fix_missing_locations().
+  for child in ast.walk(node):
+    if hasattr(child, 'lineno'):
+      child.lineno = lineno
+      child.col_offset = col_offset
+
+  if mode == 'exec':
+    return t.cast(ast.Module, node).body
+
+  elif mode == 'eval':
+    node = t.cast(ast.Expression, ast.parse(name, mode='eval'))
+    return [node.body]
+
+  else:
+    raise ValueError(f'bad mode: {mode!r}')
