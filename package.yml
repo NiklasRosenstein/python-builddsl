@@ -1,0 +1,10 @@
+name: kahmi-dsl
+version: 0.0.0
+author: Niklas Rosenstein <rosensteinniklas@gmail.com>
+modulename: kahmi.dsl
+description: Parser and transpiler for the Kahmi DSL.
+typed: true
+requirements:
+- python ^3.6
+- astor ^0.8.1
+- nr.parsing.core ^1.0.1

@@ -1,0 +1,10 @@
+
+let name = 'Sam'
+
+let myFunc = () => {
+  return name => { return f'Hello, {name}' }
+}
+
+myFunc() {
+  print(self(name))  # prints: Hello, Sam
+}
