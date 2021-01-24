@@ -1,111 +1,158 @@
 # kahmi-dsl
 
-Kahmi is a build system and DSL for Python heavily inspired by Groovy and Gradle. The `kahmi-dsl`
-package implements the parser and transpiler for the Kahmi language.
+This is a Python-based configuration language for the [Kahmi](https://github.com/kahmi-build)
+build system that is heavily inspired by Groovy and Gradle.
 
-## Syntax
-
-The Kahmi DSL might look familar to you if you have used Groovy before. While not any Python code
-is valid Kahmi DSL code, the full Python language is supported in various places. Additionally,
-Kahmi DSL allows you to define multi-line lambdas inline with full Python code.
-
-Every Kahmi file starts with a "context" object. There are four main syntactical elements that
-are supported by the Kahmi language:
-
-* `let` definitions for local variables
-* member assignments to the current context
-* calls and call blocks
-* Python expressions (with multi-line lambda support)
+__Example:__
 
 ```python
-let re = __import__('re')
+buildscript {
+  dependencies = ["kahmi-git", "kahmi-cxx"]
+}
 
-msg = "Hello, World!"
+let cxx = load("kahmi-cxx")
+let git = load("kahmi-git")
 
-print(re.sub(r'[,!]', '', self.msg))  # prints: Hello World
+name = "myproject"
+version = git.version()
 
-re.sub(r'[A-z ]', '', self.msg) {
-  print(self)  # prints: ,!
+cxx.build("main") {
+  srcs = glob("src/*.cpp")
+  type = "executable"
 }
 ```
 
-You can transpile it into Python code to see what's going on under the hood:
+## Syntax & Semantics
 
-```
-$ python -m kahmi.dsl build.kahmi   -E
-re = __import__('re')
-self.msg = 'Hello, World!'
-__lookup__('print', locals(), self)(re.sub('[,!]', '', self.msg))
+The Kahmi DSL basically wraps Python code and even extends it's normal syntax with **multiline
+lambdas**.
 
+Every Kahmi script is executed in a given "context", that can be an arbitrary Python object which
+is addressable in Python expressions as "self". There are 3 different types of operations one can
+perform. Entering a Python expression or multiline lambda reverts the parser back into full Python
+mode (with the aforementioned multiline lambda support).
 
-def __call_re_sub(self):
-    __lookup__('print', locals(), self)(self)
+1. **Define a local variable with the `let` Keyword**
 
+    Local variables are defined using the `let` keyword. The variable can then be addressed in
+    Python expressions or as call block targets (see below). The right hand side of the assignment
+    must be a Python expression.
 
-value = __lookup__('re', locals(), self).sub('[A-z ]', '', self.msg)
-__call_re_sub(value)
-```
+    ```python
+    let my_variable = 42
+    ```
 
-What you see as *self* here is the current "context" object and `__lookup__()` is a helper
-that allows you to call local variables, members of the context or builtins.
+2. **Set a propery on the current context object**
 
-### Lambdas
+    The same syntax but without the `let` keyword assigns the value to a member of the current
+    context object instead of to a local variable.
 
-Lambdas are implemented by placing function definitions for you before they are used. Lambdas
-can be nested and they are properly taking the right scope in most cases (exceptions are Python
-expressions that introduce a new scope like generator, tuple, list, set and dict comprehensions).
+    ```python
+    nmae = "my-project"
+    version = git.version()
+    ```
+
+3. **Call blocks**
+
+    A call block is used to invoke a method or function and optionally enter a new scope with the
+    return value as the new context object. The first name of the call block target is resolved in
+    the local variables, then in the members of the current context object and the parent context
+    objects and finally in the Python built-ins.
+
+    ```python
+    print("Hello, World!")  # Call without body
+
+    buildscript {  # Call with body and without arguments
+      dependencies = ["kahmi-python"]
+    }
+
+    cxx.build("main") {  # Call with body and arguments, addressing a member of the `cxx` target.
+      srcs = glob("src/*.cpp")
+    }
+    ```
+
+4. **Multi-line lambdas**
+
+    The Kahmi DSL parser injects the ability to define multi-line lambdas in any Python
+    expression. The lambda syntax is inspired by Javascript/Typescript and uses `=>` as
+    the lambda arrow operation to connect the argument definition with the lambda body.
+
+    A lambda with braces requires a return statement, otherwhise the return value of the
+    lambda will be `None`. Single-statement lambdas are not currently supported with this
+    syntax (although you can always fall back to standard syntax `lambda: <expr>`).
+
+    ```python
+    let myFunc = () => {
+      import random
+      return random.random()
+    }
+
+    print(myFunc())
+    ```
+
+    Nesting lambdas is supported and has the expected semantics except if used in comprehensions
+    (as they introduce a new scope that can not be captured by the function definition that is
+    a multi-line lambda is transpiled to).
+
+## Built-ins
+
+Kahmi only provides two additional built-in functions on top of what is provided by Python, and
+they are only necessary for the execution of Kahmi's generated Python code.
+
+| Name | Description |
+| ---- | ----------- |
+| `self` | The root context object for the script. |
+| `__lookup__(name, locals_, ctx)` | Helper function to resolve the targets of call blocks. |
+
+## Under the hood
+
+Kahmi comes with a simple cli that allows you to run any Kahmi script, but given the limited
+ability to override the root context object it is expected that it does not serve much use outside
+of debugging and development.
+
+    $ python -m kahmi.dsl examples/hello.kmi
+
+Using the `-E` option, you can retrieve the Python code that a Kahmi file is transpiled to. This
+is especially useful to understand how Kahmi constructs are converted into Python. Below are some
+examples:
 
 ```python
-let myFunc = () => {
-  return name => { return f'Hello, {name}' }
-}
+let msg = (name) => {
+  return 'Hello, ' + name
+}('World')
 
-myFunc() {
-  print(self('Sam'))  # prints: Hello, Sam
-}
+print(msg)
 ```
-
-Again, transpiling into pure Python code help to understand what is going on:
 
 ```python
-ef lambda_build_kahmi_1_13():
-
-    def lambda_build_kahmi_2_8(name):
-        return f'Hello, {name!r}'
-    return lambda_build_kahmi_2_8
+def lambda_stdin_1_10(name):
+    return 'Hello, ' + name
 
 
-myFunc = lambda_build_kahmi_1_13
-
-
-def __call_myFunc(self):
-    __lookup__('print', locals(), self)(self('Sam'))
-
-
-value = __lookup__('myFunc', locals(), self)()
-__call_myFunc(value)
+msg = lambda_stdin_1_10('World')
+__lookup__('print', locals(), self)(msg)
 ```
 
-## CLI
+---
 
-The command-line interface for the `kahmi-dsl` package is very simplistic. It is not expected that
-it provides much value outside of development as it only provides a limited method of building
-and passing the root context object to the script.
-
-```
-usage: python -m kahmi.dsl [-h] [-c ENTRYPOINT] [-E] [file]
-
-positional arguments:
-  file
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -c ENTRYPOINT, --context ENTRYPOINT
-  -E, --transpile
+```python
+buildscript {
+  dependencies = ["kahmi-python"]
+}
 ```
 
-If no `-c,--context` is provided a `kahmi.dsl.__main__.VoidContext` object is used which is really
-just an instance of an empty class.
+```python
+def __call_buildscript(self):
+    self.dependencies = ['kahmi-python']
+
+
+__call_buildscript_self_arg = __lookup__('buildscript', locals(), self)()
+if hasattr(__call_buildscript_self_arg, '__enter__'):
+    with __call_buildscript_self_arg:
+        __call_buildscript(__call_buildscript_self_arg)
+else:
+    __call_buildscript(__call_buildscript_self_arg)
+```
 
 ---
 
