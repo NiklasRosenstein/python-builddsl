@@ -17,7 +17,7 @@ else:
 
 requirements = [
   'astor >=0.8.1,<1.0.0',
-  'nr.parsing.core >=1.0.1,<2.0.0',
+  'nr.parsing.core >=1.1.0,<2.0.0',
 ]
 
 setuptools.setup(
