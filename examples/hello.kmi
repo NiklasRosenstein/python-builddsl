@@ -1,5 +1,8 @@
+# Expected output:
+#
+# Hello, World
 
-let name = 'Sam'
+let name = 'World'
 
 let myFunc = () => {
   return name => { return f'Hello, {name}' }
