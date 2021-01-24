@@ -71,6 +71,9 @@ mode (with the aforementioned multiline lambda support).
     }
     ```
 
+    If the new context object that is returned by the called function supports the Python
+    context manager interface, it will be used around the execution of the call block's body.
+
 4. **Multi-line lambdas**
 
     The Kahmi DSL parser injects the ability to define multi-line lambdas in any Python
