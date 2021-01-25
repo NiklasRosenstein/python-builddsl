@@ -22,12 +22,12 @@ class Transpiler:
     pyast.fix_missing_locations(node)
 
   def transpile_module(self, module: ast.Module) -> pyast.Module:
-    nodes: t.List[pyast.AST] = list(self.transpile_nodes(module.body))
+    nodes: t.List[pyast.stmt] = list(self.transpile_nodes(module.body))
     pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
     return pyast_module
 
-  def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.AST]:
+  def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
     for node in nodes:
       if isinstance(node, ast.Let):
         yield from self.transpile_let(node)
@@ -38,7 +38,7 @@ class Transpiler:
       else:
         raise RuntimeError(f'encountered unexpected node: {node!r}')
 
-  def transpile_call(self, node: ast.Call) -> t.Iterator[pyast.AST]:
+  def transpile_call(self, node: ast.Call) -> t.Iterator[pyast.stmt]:
     if node.body:
       func_name = '__call_' + node.target.name.replace('.', '_')
       body = list(self.transpile_nodes(node.body))
@@ -63,24 +63,24 @@ class Transpiler:
 
       # If the value appears to be a context manager, enter it's context before executing
       # the body of the call.
-      yield from util.compile_snippet(
+      yield from t.cast(t.List[pyast.stmt], util.compile_snippet(
         f'if hasattr({value_name}, "__enter__"):\n'
         f'  with {value_name}:\n'
         f'    {func_name}({value_name})\n'
         f'else:\n'
         f'  {func_name}({value_name})\n',
         lineno=node.loc.lineno,
-        col_offset=node.loc.colno)
+        col_offset=node.loc.colno))
 
     else:
       yield pyast.Expr(invoke_method)
 
-  def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.AST]:
+  def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
     target = self.transpile_target(self.context_var_name, node.target, pyast.Store())
     yield from [x.fdef for x in node.value.lambdas]
     yield pyast.Assign(targets=[target], value=node.value.expr.body)
 
-  def transpile_let(self, node: ast.Let) -> t.Iterator[pyast.AST]:
+  def transpile_let(self, node: ast.Let) -> t.Iterator[pyast.stmt]:
     target = self.transpile_target(None, node.target, pyast.Store())
     yield from [x.fdef for x in node.value.lambdas]
     yield pyast.Assign(targets=[target], value=node.value.expr.body)

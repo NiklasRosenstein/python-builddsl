@@ -28,7 +28,7 @@ class maps(t.Generic[T, U]):
 def module(body: t.List[ast.stmt]) -> ast.Module:
   node = ast.Module(body)
   if sys.version >= '3.8':
-    node.type_ignores = []
+    node.type_ignores = []  # type: ignore
   return node
 
 
@@ -41,7 +41,7 @@ def arguments(args: t.List[ast.arg]) -> ast.arguments:
       kwarg=None,
       defaults=[])
   if sys.version >= '3.8':
-    node.posonlyargs = []
+    node.posonlyargs = []  # type: ignore
   return node
 
 
