@@ -42,7 +42,7 @@ mode (with the aforementioned multiline lambda support).
     let my_variable = 42
     ```
 
-2. **Set a propery on the current context object**
+2. **Set a property on the current context object**
 
     The same syntax but without the `let` keyword assigns the value to a member of the current
     context object instead of to a local variable.
