@@ -39,7 +39,7 @@ def _lookup(name: str, *scopes: t.Any) -> None:
 
 def run_file(
   context: t.Any,
-  globals: t.Mapping[str, t.Any],
+  globals: t.Dict[str, t.Any],
   filename: str,
   fp: t.Optional[t.TextIO] = None,
 ) -> None:

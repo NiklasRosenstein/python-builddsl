@@ -27,7 +27,7 @@ class maps(t.Generic[T, U]):
 def function_def(
   name: str,
   args: t.List[str],
-  body: t.List[ast.AST],
+  body: t.Sequence[ast.AST],
   lineno: t.Optional[int] = None,
   col_offset: t.Optional[int] = None,
 ) -> ast.FunctionDef:
@@ -73,7 +73,7 @@ def name_expr(
   return node
 
 
-def compile_snippet(snippet: str, lineno: int, col_offset: int, mode: str = 'exec') -> t.List[ast.AST]:
+def compile_snippet(snippet: str, lineno: int, col_offset: int, mode: str = 'exec') -> t.Sequence[ast.AST]:
   """
   Compile a snippet into a Python AST.
   """
@@ -90,7 +90,7 @@ def compile_snippet(snippet: str, lineno: int, col_offset: int, mode: str = 'exe
     return t.cast(ast.Module, node).body
 
   elif mode == 'eval':
-    node = t.cast(ast.Expression, ast.parse(name, mode='eval'))
+    node = t.cast(ast.Expression, ast.parse(snippet, mode='eval'))
     return [node.body]
 
   else:

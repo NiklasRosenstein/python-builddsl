@@ -4,7 +4,7 @@ import importlib
 import os
 import sys
 
-import astor
+import astor  # type: ignore
 
 from . import run_file, parse_file
 

@@ -4,7 +4,7 @@ import types
 import typing as t
 from dataclasses import dataclass, field
 
-import astor
+import astor  # type: ignore
 
 
 @dataclass
@@ -72,7 +72,7 @@ class Target(Node):
         context = context[part]
       else:
         context = getattr(context, part)
-    if isinstance(context, t.Mapping):
+    if isinstance(context, t.MutableMapping):
       context[parts[-1]] = value
     else:
       setattr(context, parts[-1], value)

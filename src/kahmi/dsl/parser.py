@@ -7,7 +7,7 @@ import string
 import textwrap
 import typing as t
 
-from nr.parsing.core import Scanner, Lexer, Rule, Regex, Charset, TokenizationError
+from nr.parsing.core import Scanner, Lexer, Rule, Regex, Charset, TokenizationError  # type: ignore
 
 from . import ast, util
 
@@ -228,7 +228,7 @@ class Parser:
     if requires_wrapper:
       statements = t.cast(pyast.FunctionDef, t.cast(pyast.Module, pyast_node).body[0]).body
     else:
-      statements = [pyast_node]
+      statements = [t.cast(pyast.Expr, pyast_node)]
 
     return statements, lambdas
 
@@ -243,6 +243,7 @@ class Parser:
 
     stmts, lambdas = self._parse_python(mode)
     assert len(stmts) == 1
+    assert isinstance(stmts[0], pyast.Expression)
     return ast.Expr(loc, lambdas, stmts[0])
 
   def _try_parse_lambda(self) -> t.Optional[ast.Lambda]:
@@ -318,8 +319,12 @@ class Parser:
       self._error(pyast.FunctionDef, Token.CONTROL, '}')
     self._lexer.next()
 
-    return util.function_def(name, argument_names, [x.fdef for x in lambdas] + stmts,
-      lineno=loc.lineno, col_offset=loc.colno)
+    return util.function_def(
+      name,
+      argument_names,
+      [x.fdef for x in lambdas] + stmts,  # type: ignore
+      lineno=loc.lineno,
+      col_offset=loc.colno)
 
   def _parse_statement(self) -> t.Optional[ast.Node]:
     """

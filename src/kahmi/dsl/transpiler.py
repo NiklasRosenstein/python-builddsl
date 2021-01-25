@@ -3,7 +3,6 @@
 Transpiles a Kahmi DSL AST into a pure Python AST.
 """
 
-import astor  # DEBUG
 import ast as pyast
 import typing as t
 from dataclasses import dataclass
@@ -24,9 +23,9 @@ class Transpiler:
 
   def transpile_module(self, module: ast.Module) -> pyast.Module:
     nodes: t.List[pyast.AST] = list(self.transpile_nodes(module.body))
-    module = pyast.Module(nodes)
-    pyast.fix_missing_locations(module)
-    return module
+    pyast_module = pyast.Module(nodes)
+    pyast.fix_missing_locations(pyast_module)
+    return pyast_module
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.AST]:
     for node in nodes:
