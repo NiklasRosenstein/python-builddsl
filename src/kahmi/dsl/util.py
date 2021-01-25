@@ -1,5 +1,6 @@
 
 import ast
+import sys
 import typing as t
 
 T = t.TypeVar('T')
@@ -24,6 +25,19 @@ class maps(t.Generic[T, U]):
     return None
 
 
+def arguments(args: t.List[ast.arg]) -> ast.arguments:
+  node = ast.arguments(
+      args=args,
+      vararg=None,
+      kwonlyargs=[],
+      kw_defaults=[],
+      kwarg=None,
+      defaults=[])
+  if sys.version >= '3.7':
+    node.posonlyargs = []
+  return node
+
+
 def function_def(
   name: str,
   args: t.List[str],
@@ -37,13 +51,7 @@ def function_def(
 
   node = ast.FunctionDef(
     name=name,
-    args=ast.arguments(
-      args=[ast.arg(x, None) for x in args],
-      vararg=None,
-      kwonlyargs=[],
-      kw_defaults=[],
-      kwarg=None,
-      defaults=[]),
+    args=arguments([ast.arg(x, None) for x in args]),
     body=body,
     decorator_list=[],
     lineno=lineno,
