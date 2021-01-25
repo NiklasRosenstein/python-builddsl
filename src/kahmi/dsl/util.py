@@ -33,7 +33,7 @@ def arguments(args: t.List[ast.arg]) -> ast.arguments:
       kw_defaults=[],
       kwarg=None,
       defaults=[])
-  if sys.version >= '3.7':
+  if sys.version >= '3.8':
     node.posonlyargs = []
   return node
 
