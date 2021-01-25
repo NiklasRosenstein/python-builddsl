@@ -23,7 +23,7 @@ requirements = [
 
 setuptools.setup(
   name = 'kahmi-dsl',
-  version = '0.0.1',
+  version = '0.0.2',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
   description = 'Parser and transpiler for the Kahmi DSL.',
