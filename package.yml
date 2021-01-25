@@ -8,3 +8,4 @@ requirements:
 - python ^3.6
 - astor ^0.8.1
 - nr.parsing.core ^1.1.0
+- dataclasses ^0.6
