@@ -23,7 +23,7 @@ class Transpiler:
 
   def transpile_module(self, module: ast.Module) -> pyast.Module:
     nodes: t.List[pyast.AST] = list(self.transpile_nodes(module.body))
-    pyast_module = pyast.Module(nodes)
+    pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
     return pyast_module
 
