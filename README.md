@@ -97,6 +97,21 @@ mode (with the aforementioned multiline lambda support).
     (as they introduce a new scope that can not be captured by the function definition that is
     a multi-line lambda is transpiled to).
 
+5. **Macros**
+
+    Macros are plugins that can be enabled in the Kahmi DSL parser to implement custom parsing
+    logic following a macro identifier. The Kahmi DSL parser comes with a YAML plugin out of the
+    box:
+
+    ```python
+    buildscript {
+      dependencies = !yaml {
+        - kahmi-git
+        - kahmi-python
+      }
+    }
+    ```
+
 ## Built-ins
 
 Kahmi only provides two additional built-in functions on top of what is provided by Python, and

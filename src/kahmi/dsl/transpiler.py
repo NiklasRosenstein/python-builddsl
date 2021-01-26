@@ -4,11 +4,12 @@ Transpiles a Kahmi DSL AST into a pure Python AST.
 """
 
 import ast as pyast
+import builtins
 import typing as t
 from dataclasses import dataclass
 
-from . import ast, util
-
+from . import ast, parser, util
+from .macros import MacroPlugin
 
 @dataclass
 class Transpiler:
@@ -110,3 +111,60 @@ class Transpiler:
 
   def transpile_expr(self, node: ast.Expr) -> t.Tuple[t.List[pyast.FunctionDef], pyast.expr]:
     return [x.fdef for x in node.lambdas], node.expr.body
+
+
+def _lookup(name: str, *scopes: t.Any) -> None:
+  objs = []
+  for scope in scopes:
+    if isinstance(scope, dict):
+      if name in scope:
+        return scope[name]
+    else:
+      try:
+        return getattr(scope, name)
+      except AttributeError:
+        pass
+      objs.append(scope)
+  try:
+    return getattr(builtins, name)
+  except AttributeError:
+    pass
+
+  msg = f'lookup for {name!r} failed, checked locals and:'
+  for obj in objs:
+    msg += f'\n  - {type(obj).__name__!r}'
+  msg += '\n  - builtins'
+  raise NameError(msg)
+
+
+def run_file(
+  context: t.Any,
+  globals: t.Dict[str, t.Any],
+  filename: str,
+  fp: t.Optional[t.TextIO] = None,
+  macros: t.Optional[t.Dict[str, MacroPlugin]] = None,
+) -> None:
+
+  globals['__lookup__'] = _lookup
+  globals['self'] = context
+
+  module = compile_file(filename, fp, macros)
+  code = compile(module, filename=filename, mode='exec')
+  exec(code, globals)
+
+
+def compile_file(
+  filename: str,
+  fp: t.Optional[t.TextIO] = None,
+  macros: t.Optional[t.Dict[str, MacroPlugin]] = None,
+) -> pyast.Module:
+
+  if fp is None:
+    with open(filename, 'r') as fp:
+      return compile_file(filename, fp, macros)
+
+  module = parser.Parser(fp.read(), filename, macros).parse()
+  return Transpiler().transpile_module(module)
+
+
+__all__ = ['Transpiler', 'run_file', 'compile_file']

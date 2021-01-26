@@ -39,7 +39,11 @@ setuptools.setup(
   tests_require = [],
   python_requires = '>=3.6.0,<4.0.0',
   data_files = [],
-  entry_points = {},
+  entry_points = {
+    'kahmi.dsl.macros': [
+      'yaml = kahmi.dsl.macros.yaml:YamlMacro',
+    ]
+  },
   cmdclass = {},
   keywords = [],
   classifiers = [],
