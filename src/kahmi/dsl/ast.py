@@ -114,7 +114,7 @@ class Call(Node):
   lambdas: t.List[Lambda]
 
   #: A Python expression that evaluates to the tuple of arguments for the target.
-  args: t.List[pyast.expr]
+  args: t.Optional[t.List[pyast.expr]]
 
   #: A list of statements to execute in the block.
   body: t.List[Node]

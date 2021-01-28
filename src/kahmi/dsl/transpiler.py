@@ -41,7 +41,7 @@ class Transpiler:
 
   def transpile_call(self, node: ast.Call) -> t.Iterator[pyast.stmt]:
     if node.body:
-      func_name = '__call_' + node.target.name.replace('.', '_')
+      func_name = '__configure_' + node.target.name.replace('.', '_')
       body = list(self.transpile_nodes(node.body))
       yield util.function_def(
         func_name, [self.context_var_name], body,
@@ -49,32 +49,34 @@ class Transpiler:
 
     yield from [x.fdef for x in node.lambdas]
 
+    target = self.transpile_target(None, node.target, pyast.Load())
+
     # Generate a call expression for the selected method.
-    invoke_method = pyast.Call(
-      # TODO(NiklasRosenstein): We need to decide whether to prefix it with self() or not.
-      func=self.transpile_target(None, node.target, pyast.Load()),
-      args=node.args,
-      keywords=[],
-      lineno=node.loc.lineno,
-      col_offset=node.loc.colno)
+    if node.args is not None:
+      target = pyast.Call(
+        # TODO(NiklasRosenstein): We need to decide whether to prefix it with self() or not.
+        func=target,
+        args=node.args,
+        keywords=[],
+        lineno=node.loc.lineno,
+        col_offset=node.loc.colno)
 
     if node.body:
-      value_name = func_name + '_' + self.context_var_name + '_arg'
-      yield pyast.Assign(targets=[util.name_expr(value_name, pyast.Store())], value=invoke_method)
+      value_name = func_name + '_' + self.context_var_name + '_target'
+      yield pyast.Assign(targets=[util.name_expr(value_name, pyast.Store())], value=target)
 
       # If the value appears to be a context manager, enter it's context before executing
       # the body of the call.
       yield from t.cast(t.List[pyast.stmt], util.compile_snippet(
-        f'if hasattr({value_name}, "__enter__"):\n'
-        f'  with {value_name}:\n'
-        f'    {func_name}({value_name})\n'
+        f'if hasattr({value_name}, "configure"):\n'
+        f'  {value_name}.configure({func_name})\n'
         f'else:\n'
-        f'  {func_name}({value_name})\n',
+        f'  {value_name}({func_name})\n',
         lineno=node.loc.lineno,
         col_offset=node.loc.colno))
 
     else:
-      yield pyast.Expr(invoke_method)
+      yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
     target = self.transpile_target(self.context_var_name, node.target, pyast.Store())

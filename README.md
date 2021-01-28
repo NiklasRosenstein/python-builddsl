@@ -52,27 +52,23 @@ mode (with the aforementioned multiline lambda support).
     version = git.version()
     ```
 
-3. **Call blocks**
+3. **Configure blocks**
 
-    A call block is used to invoke a method or function and optionally enter a new scope with the
-    return value as the new context object. The first name of the call block target is resolved in
-    the local variables, then in the members of the current context object and the parent context
-    objects and finally in the Python built-ins.
+    A configure block basically generates a Python function, called the "closure", and passes it
+    to the specified target. The closure that is defined after the target is passed to the target
+    by either calling it's `configure()` method or calling the target directly. 
 
     ```python
     print("Hello, World!")  # Call without body
 
-    buildscript {  # Call with body and without arguments
+    buildscript {
       dependencies = ["kahmi-python"]
     }
 
-    cxx.build("main") {  # Call with body and arguments, addressing a member of the `cxx` target.
+    cxx.build("main") {
       srcs = glob("src/*.cpp")
     }
     ```
-
-    If the new context object that is returned by the called function supports the Python
-    context manager interface, it will be used around the execution of the call block's body.
 
 4. **Multi-line lambdas**
 
@@ -160,16 +156,15 @@ buildscript {
 ```
 
 ```python
-def __call_buildscript(self):
+def __configure_buildscript(self):
     self.dependencies = ['kahmi-python']
 
 
-__call_buildscript_self_arg = __lookup__('buildscript', locals(), self)()
-if hasattr(__call_buildscript_self_arg, '__enter__'):
-    with __call_buildscript_self_arg:
-        __call_buildscript(__call_buildscript_self_arg)
+__configure_buildscript_self_target = __lookup__('buildscript', locals(), self)
+if hasattr(__configure_buildscript_self_target, 'configure'):
+    __configure_buildscript_self_target.configure(__configure_buildscript)
 else:
-    __call_buildscript(__call_buildscript_self_arg)
+    __configure_buildscript_self_target(__configure_buildscript)
 ```
 
 ---

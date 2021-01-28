@@ -76,7 +76,7 @@ class Parser:
     Regex(Token.LITERAL, r'[+\-]?(\d+)(\.\d*)?', group=0),  # TODO: Binary, Octal, etc.
     Regex(Token.CONTROL, r'(\[|\]|\{|\}|\(|\)|<<|<|>>|>|\.|,|\->|\-|!|\+|\*|//|/|=>|==|=|:|&|\||^|%|@|;)', group=0),
     LambdaRule(Token.LITERAL, _tokenize_string_literal.__func__),  # type: ignore
-    Regex(Token.NAME, r'[A-z\_][A-z0-9\_]*', group=0),
+    Regex(Token.NAME, r'[A-z\_][A-Za-z0-9\_]*', group=0),
     Charset(Token.INDENT, ' \t', at_column=0),
     Charset(Token.NEWLINE, '\n'),
     Charset(Token.WHITESPACE, ' \t'),
@@ -360,7 +360,7 @@ class Parser:
       target = self.parse_target()
       is_call = False
       lambdas: t.List[ast.Lambda] = []
-      args: t.List[pyast.expr] = []
+      args: t.Optional[t.List[pyast.expr]] = None
       body: t.List[ast.Node] = []
 
       if self._lexer.token.tv == (Token.CONTROL, '('):
