@@ -24,13 +24,10 @@ cxx.build("main") {
 
 ## Syntax & Semantics
 
-The Kahmi DSL basically wraps Python code and even extends it's normal syntax with **multiline
-lambdas**.
+The Kahmi DSL is not a strict superset of the Python language, instead it wraps Python code and
+swaps between DSL parsing and Python code parsing.
 
-Every Kahmi script is executed in a given "context", that can be an arbitrary Python object which
-is addressable in Python expressions as "self". There are 3 different types of operations one can
-perform. Entering a Python expression or multiline lambda reverts the parser back into full Python
-mode (with the aforementioned multiline lambda support).
+### Kahmi DSL Syntax
 
 1. **Define a local variable with the `let` Keyword**
 
@@ -70,7 +67,14 @@ mode (with the aforementioned multiline lambda support).
     }
     ```
 
-4. **Multi-line lambdas**
+    > At the root level, every Kahmi script is basically a closure that is executed against the
+    > main context object.
+
+### Python Syntax Extensions
+
+When parsing a Python expression, Kahmi injects support for multi-line lambdas and macros.
+
+1. **Multi-line lambdas**
 
     The Kahmi DSL parser injects the ability to define multi-line lambdas in any Python
     expression. The lambda syntax is inspired by Javascript/Typescript and uses `=>` as
@@ -93,7 +97,7 @@ mode (with the aforementioned multiline lambda support).
     (as they introduce a new scope that can not be captured by the function definition that is
     a multi-line lambda is transpiled to).
 
-5. **Macros**
+2. **Macros**
 
     Macros are plugins that can be enabled in the Kahmi DSL parser to implement custom parsing
     logic following a macro identifier. The Kahmi DSL parser comes with a YAML plugin out of the
