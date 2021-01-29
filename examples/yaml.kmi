@@ -1,3 +1,7 @@
+####
+# This example demonstrates the YAML inline macro.
+####
+#
 # enabled macros: yaml
 # expected output:
 #

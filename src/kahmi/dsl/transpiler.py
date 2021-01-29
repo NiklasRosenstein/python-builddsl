@@ -64,7 +64,7 @@ class Runtime:
     return self._threadlocal_stack.pop()
 
   @contextlib.contextmanager
-  def pushing(self, ctx: t.Any) -> None:
+  def pushing(self, ctx: t.Any) -> t.Iterator[None]:
     try:
       self.push(ctx)
       yield

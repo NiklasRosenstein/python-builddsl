@@ -1,3 +1,7 @@
+####
+# A simple hello world program in Kahmi DSL that shows how closures are executed.
+####
+#
 # expected output:
 #
 # Hello, World!

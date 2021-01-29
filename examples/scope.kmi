@@ -1,4 +1,9 @@
-# Expected output:
+####
+# This example shows how property assignments are evaluated against the context object, yet
+# name resolution is still able to resolve it.
+####
+#
+# expected output:
 #
 # ['kahmi-python']
 # False
