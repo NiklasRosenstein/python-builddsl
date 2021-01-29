@@ -166,7 +166,7 @@ def lambda_stdin_1_10(name):
 
 
 msg = lambda_stdin_1_10('World')
-__lookup__('print', locals(), self)(msg)
+__runtime__['print'](msg)
 ```
 
 ---
@@ -178,15 +178,17 @@ buildscript {
 ```
 
 ```python
+@__runtime__.closure()
 def __configure_buildscript(self):
     self.dependencies = ['kahmi-python']
 
 
-__configure_buildscript_self_target = __lookup__('buildscript', locals(), self)
-if hasattr(__configure_buildscript_self_target, 'configure'):
-    __configure_buildscript_self_target.configure(__configure_buildscript)
-else:
-    __configure_buildscript_self_target(__configure_buildscript)
+__configure_buildscript_self_target = __runtime__['buildscript']
+with __runtime__.pushing(__runtime__['locals']()):
+    if __runtime__['hasattr'](__configure_buildscript_self_target, 'configure'):
+        __configure_buildscript_self_target.configure(__configure_buildscript)
+    else:
+        __configure_buildscript_self_target(__configure_buildscript)
 ```
 
 ---
