@@ -13,7 +13,7 @@ import typing as t
 from itertools import chain
 from dataclasses import dataclass
 
-from nr.pylang.ast.dynamic_eval import transform as _transform_variables
+from nr.pylang.ast.dynamic_eval import rewrite_names  # type: ignore
 
 from . import ast, parser, util
 from .macros import MacroPlugin
@@ -119,7 +119,9 @@ class Transpiler:
     pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
     # Rewrite variable references with lookups via the __runtime__.
-    pyast_module = _transform_variables(pyast_module, self.runtime_object_name, store=False, delete=False)
+    pyast_module = rewrite_names(
+      pyast_module, self.runtime_object_name,
+      store=False, delete=False, scope_inheritance=False)
     return pyast_module
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
@@ -137,7 +139,7 @@ class Transpiler:
     if node.body:
       func_name = '__configure_' + node.target.name.replace('.', '_')
       body = list(self.transpile_nodes(node.body))
-      dec = util.compile_snippet('__runtime__.closure()')[0].value
+      dec = t.cast(pyast.Expr, util.compile_snippet('__runtime__.closure()')[0]).value
       yield util.function_def(
         func_name,
         [self.closure_arg_name],
