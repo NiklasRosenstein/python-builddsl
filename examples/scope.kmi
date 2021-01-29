@@ -1,0 +1,10 @@
+# Expected output:
+#
+# ['kahmi-python']
+# False
+# True
+
+dependencies = ["kahmi-python"]
+print(dependencies)
+print('dependencies' in locals())
+print('dependencies' in vars(self))

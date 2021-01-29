@@ -5,17 +5,109 @@ Transpiles a Kahmi DSL AST into a pure Python AST.
 
 import ast as pyast
 import builtins
+import contextlib
+import functools
+import threading
+import sys
 import typing as t
+from itertools import chain
 from dataclasses import dataclass
+
+from nr.pylang.ast.dynamic_eval import transform as _transform_variables
 
 from . import ast, parser, util
 from .macros import MacroPlugin
 
+T_Callable = t.TypeVar('T_Callable', bound=t.Callable)
+
+
+class Runtime:
+  """
+  A runtime object supports the execution of a Python module transpiled from the Kahmi DSL. The
+  runtime is a thread-safe object that keeps track of the closure targets and local variables in
+  order to implement the name resolution.
+  """
+
+  def __init__(self, initial: t.Any):
+    self._initial = initial
+    self._threadlocal = threading.local()
+
+  @property
+  def _threadlocal_stack(self) -> t.List[t.Any]:
+    try:
+      return self._threadlocal.stack
+    except AttributeError:
+      stack = self._threadlocal.stack = []
+      if self._initial is not None:
+        stack.append(self._initial)
+      return stack
+
+  def closure(self) -> t.Callable[[T_Callable], T_Callable]:
+    """
+    Mark a function as being a closure. Effectively this just pushes the first argument of the
+    closure on the threadlocal stack for name resolution.
+    """
+
+    def decorator(func):
+      @functools.wraps(func)
+      def wrapper(ctx, *args, **kwargs):
+        with self.pushing(ctx):
+          return func(ctx, *args, **kwargs)
+      return wrapper
+
+    return decorator
+
+  def push(self, ctx: t.Any) -> None:
+    self._threadlocal_stack.append(ctx)
+
+  def pop(self) -> t.Any:
+    return self._threadlocal_stack.pop()
+
+  @contextlib.contextmanager
+  def pushing(self, ctx: t.Any) -> None:
+    try:
+      self.push(ctx)
+      yield
+    finally:
+      assert self.pop() is ctx
+
+  def lookup(self, name: str) -> t.Any:
+    """
+    Performs a lookup for a variable. First, it checks the locals of the calling frame. Then, it
+    checks the dictionaries or object's stored on the runtime's thread-local stack. Finally, the
+    calling frame's globals are checked.
+    """
+
+    frame = sys._getframe(1)
+    try:
+      for item in chain([frame.f_locals], reversed(self._threadlocal_stack), [frame.f_globals, builtins]):
+        if isinstance(item, t.Mapping):
+          if name in item:
+            return item[name]
+        else:
+          try:
+            return getattr(item, name)
+          except AttributeError:
+            pass
+      raise NameError(name, self._threadlocal_stack)
+    finally:
+      del frame
+
+  __getitem__ = lookup
+
+
 @dataclass
 class Transpiler:
 
-  lookup_func_name: str = '__lookup__'
-  context_var_name: str = 'self'
+  #: The name of the #Runtime object that is present in the global scope during execution
+  #: of the transpiled module.
+  runtime_object_name: str = '__runtime__'
+
+  #: The name of the closure argument.
+  closure_arg_name: str = 'self'
+
+  def _lookup_code(self, name: str) -> str:
+    return f'{self.runtime_object_name}.lookup({name!r})'
 
   def transfer_loc(self, loc: ast.Location, node: pyast.AST) -> None:
     node.lineno = loc.lineno
@@ -26,6 +118,8 @@ class Transpiler:
     nodes: t.List[pyast.stmt] = list(self.transpile_nodes(module.body))
     pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
+    # Rewrite variable references with lookups via the __runtime__.
+    pyast_module = _transform_variables(pyast_module, self.runtime_object_name, store=False, delete=False)
     return pyast_module
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
@@ -43,8 +137,12 @@ class Transpiler:
     if node.body:
       func_name = '__configure_' + node.target.name.replace('.', '_')
       body = list(self.transpile_nodes(node.body))
+      dec = util.compile_snippet('__runtime__.closure()')[0].value
       yield util.function_def(
-        func_name, [self.context_var_name], body,
+        func_name,
+        [self.closure_arg_name],
+        body,
+        decorator_list=[dec],
         lineno=node.loc.lineno, col_offset=node.loc.colno)
 
     yield from [x.fdef for x in node.lambdas]
@@ -62,16 +160,17 @@ class Transpiler:
         col_offset=node.loc.colno)
 
     if node.body:
-      value_name = func_name + '_' + self.context_var_name + '_target'
+      value_name = func_name + '_' + self.closure_arg_name + '_target'
       yield pyast.Assign(targets=[util.name_expr(value_name, pyast.Store())], value=target)
 
       # If the value appears to be a context manager, enter it's context before executing
       # the body of the call.
       yield from t.cast(t.List[pyast.stmt], util.compile_snippet(
-        f'if hasattr({value_name}, "configure"):\n'
-        f'  {value_name}.configure({func_name})\n'
-        f'else:\n'
-        f'  {value_name}({func_name})\n',
+        f'with {self.runtime_object_name}.pushing(locals()):\n'
+        f'  if hasattr({value_name}, "configure"):\n'
+        f'    {value_name}.configure({func_name})\n'
+        f'  else:\n'
+        f'    {value_name}({func_name})\n',
         lineno=node.loc.lineno,
         col_offset=node.loc.colno))
 
@@ -79,7 +178,7 @@ class Transpiler:
       yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
-    target = self.transpile_target(self.context_var_name, node.target, pyast.Store())
+    target = self.transpile_target(self.closure_arg_name, node.target, pyast.Store())
     yield from [x.fdef for x in node.value.lambdas]
     yield pyast.Assign(targets=[target], value=node.value.expr.body)
 
@@ -106,37 +205,13 @@ class Transpiler:
       return util.name_expr(name, ctx)
 
     parts = name.split('.')
-    code = f'{self.lookup_func_name}({parts[0]!r}, locals(), {self.context_var_name})'
+    code = parts[0]
     if len(parts) > 1:
       code += '.' + '.'.join(parts[1:])
     return util.name_expr(code, ctx, lineno=node.loc.lineno, col_offset=node.loc.colno)
 
   def transpile_expr(self, node: ast.Expr) -> t.Tuple[t.List[pyast.FunctionDef], pyast.expr]:
     return [x.fdef for x in node.lambdas], node.expr.body
-
-
-def _lookup(name: str, *scopes: t.Any) -> None:
-  objs = []
-  for scope in scopes:
-    if isinstance(scope, dict):
-      if name in scope:
-        return scope[name]
-    else:
-      try:
-        return getattr(scope, name)
-      except AttributeError:
-        pass
-      objs.append(scope)
-  try:
-    return getattr(builtins, name)
-  except AttributeError:
-    pass
-
-  msg = f'lookup for {name!r} failed, checked locals and:'
-  for obj in objs:
-    msg += f'\n  - {type(obj).__name__!r}'
-  msg += '\n  - builtins'
-  raise NameError(msg)
 
 
 def run_file(
@@ -147,8 +222,8 @@ def run_file(
   macros: t.Optional[t.Dict[str, MacroPlugin]] = None,
 ) -> None:
 
-  globals['__lookup__'] = _lookup
   globals['self'] = context
+  globals['__runtime__'] = Runtime(context)
 
   module = compile_file(filename, fp, macros)
   code = compile(module, filename=filename, mode='exec')

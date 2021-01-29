@@ -112,6 +112,24 @@ When parsing a Python expression, Kahmi injects support for multi-line lambdas a
     }
     ```
 
+3. **Dynamic name lookup**
+
+    Names are resolved slightly different in Kahmi Python expressions. The local scope will always
+    be resolved first. Subsequently, the current context object's members are checked, then the
+    parent closure's local variables and context object, etc. Then finally, the global variables
+    and builtins.
+
+    ```python
+    dependencies = ["kahmi-python"]
+    print(dependencies)
+    print('dependencies' in locals())
+    print('dependencies' in vars(self))
+    ```
+
+    > __Explanation__: The property assignment sets the `dependencies` attribute on the current
+    > context object. Looking up the variable will first search it in the locals, but not find it
+    > there and subsequently find it in the context object (also referrable to as `self`).
+
 ## Built-ins
 
 Kahmi only provides two additional built-in functions on top of what is provided by Python, and

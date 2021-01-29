@@ -2,7 +2,7 @@
 #
 # Init
 # Before configure
-# Hello, World
+# Hello, World!
 # After configure
 
 let cfg = () => {
@@ -19,5 +19,5 @@ let cfg = () => {
 }()
 
 cfg {
-  say_hello('World')
+  say_hello('World!')
 }
