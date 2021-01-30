@@ -4,10 +4,10 @@ import ast as pyast
 import enum
 import os
 import re
-import string
 import textwrap
 import typing as t
 
+from nr.functional import flatmap
 from nr.parsing.core import Cursor, Scanner, Lexer, Rule, Regex, Charset, TokenizationError  # type: ignore
 
 from . import ast, util
@@ -55,8 +55,8 @@ class Parser:
 
   @staticmethod
   def _tokenize_string_literal(scanner):
-    prefix = scanner.match(r'[bfru]+') | util.maps(lambda m: m.group(0)) or ''
-    quote_type = scanner.match(r'("""|\'\'\'|"|\')') | util.maps(lambda m: m.group(0))
+    prefix = scanner.match(r'[bfru]+') | flatmap(lambda m: m.group(0)) or ''  # type: ignore
+    quote_type = scanner.match(r'("""|\'\'\'|"|\')') | flatmap(lambda m: m.group(0))  # type: ignore
     if not quote_type:
       return None
     contents = ''

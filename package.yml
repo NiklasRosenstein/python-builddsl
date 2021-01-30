@@ -10,6 +10,7 @@ requirements:
 - nr.parsing.core ^1.1.0
 - nr.pylang.ast ~0.0.5
 - dataclasses ^0.6
+- nr.functional ^0.1.0
 entrypoints:
   kahmi.dsl.macros:
   - yaml = kahmi.dsl.macros.yaml:YamlMacro

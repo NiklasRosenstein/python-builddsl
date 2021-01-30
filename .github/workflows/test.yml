@@ -39,4 +39,4 @@ jobs:
         pytest
     - name: Type checking
       run: |
-        mypy src
+        mypy src --check-untyped-defs

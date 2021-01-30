@@ -3,27 +3,6 @@ import ast
 import sys
 import typing as t
 
-T = t.TypeVar('T')
-U = t.TypeVar('U')
-
-
-class maps(t.Generic[T, U]):
-  """
-  Map a function over a value if it is not None and return the result. Example usage:
-
-  ```py
-  value: t.Optional[int] = os.getenv('NUM_CORES') | maps(int)
-  ```
-  """
-
-  def __init__(self, func: t.Callable[[T], U]) -> None:
-    self._func = func
-
-  def __ror__(self, val: t.Optional[T]) -> t.Optional[U]:
-    if val is not None:
-      return self._func(val)
-    return None
-
 
 def module(body: t.List[ast.stmt]) -> ast.Module:
   node = ast.Module(body)
