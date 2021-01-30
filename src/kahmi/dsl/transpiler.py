@@ -53,11 +53,11 @@ class StrictConfigurable(Configurable):
     super().__setattr__(name, value)
 
   def configure(self: T, closure: t.Callable[[T], None]) -> None:
-    self.__in_closure = True
+    self.__in_closure = True  # type: ignore
     try:
-      super().configure(closure)
+      Configurable.configure(self, closure)
     finally:
-      self.__in_closure = False
+      self.__in_closure = False   # type: ignore
 
 
 class NameProvider(metaclass=abc.ABCMeta):
