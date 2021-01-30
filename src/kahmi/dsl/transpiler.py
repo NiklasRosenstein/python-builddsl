@@ -3,12 +3,14 @@
 Transpiles a Kahmi DSL AST into a pure Python AST.
 """
 
+import abc
 import ast as pyast
 import builtins
 import contextlib
 import functools
 import threading
 import sys
+import types
 import typing as t
 from itertools import chain
 from dataclasses import dataclass
@@ -18,7 +20,51 @@ from nr.pylang.ast.dynamic_eval import rewrite_names  # type: ignore
 from . import ast, parser, util
 from .macros import MacroPlugin
 
+T = t.TypeVar('T')
 T_Callable = t.TypeVar('T_Callable', bound=t.Callable)
+
+
+class Configurable:
+  """
+  Base class for objects that are configurable via closures. The default implementation of
+  #configure() simply calls the closure with the object.
+  """
+
+  def configure(self: T, closure: t.Callable[[T], None]) -> None:
+    closure(self)
+
+
+class StrictConfigurable(Configurable):
+  """
+  Base class for objects that are configurable via closures and do not accept setting new
+  attributes within the closure.
+  """
+
+  __in_closure: bool = False
+
+  def __setattr__(self, name: str, value: t.Any) -> None:
+    if self.__in_closure:
+      if not hasattr(self, name):
+        raise AttributeError(f'{type(self).__name__} has no attribute {name!r}')
+      if hasattr(type(self), name):
+        class_level_val = getattr(type(self), name)
+        if isinstance(class_level_val, types.FunctionType):
+          raise AttributeError(f'{type(self).__name__}.{name} cannot be overwritten')
+    super().__setattr__(name, value)
+
+  def configure(self: T, closure: t.Callable[[T], None]) -> None:
+    self.__in_closure = True
+    try:
+      super().configure(closure)
+    finally:
+      self.__in_closure = False
+
+
+class NameProvider(metaclass=abc.ABCMeta):
+
+  @abc.abstractmethod
+  def _name_provider_lookup(self, name: str) -> t.Any:
+    pass
 
 
 class Runtime:
@@ -89,6 +135,11 @@ class Runtime:
             return getattr(item, name)
           except AttributeError:
             pass
+          if hasattr(item, '_name_provider_lookup'):
+            try:
+              return item._name_provider_lookup(name)
+            except KeyError:
+              pass
       raise NameError(name, self._threadlocal_stack)
     finally:
       del frame
@@ -246,4 +297,11 @@ def compile_file(
   return Transpiler().transpile_module(module)
 
 
-__all__ = ['Transpiler', 'run_file', 'compile_file']
+__all__ = [
+  'Configurable',
+  'StrictConfigurable',
+  'NameProvider',
+  'Transpiler',
+  'run_file',
+  'compile_file',
+]

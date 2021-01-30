@@ -48,10 +48,10 @@ def test_examples(filename):
         continue
       raise ValueError(f'bad header: {line!r}')
 
-    if expected_lines[0] == '\n':
+    if expected_lines and expected_lines[0] == '\n':
       expected_lines.pop(0)
 
-    expected_output = ''.join(expected_lines)
+    expected_output = ''.join(expected_lines or [])
 
   macros = {x: get_macro_plugin(x)() for x in macros}
   print(astor.to_source(compile_file(path, macros=macros)))
