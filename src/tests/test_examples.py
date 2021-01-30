@@ -2,10 +2,9 @@
 import contextlib
 import os
 import io
-import itertools
 import typing as t
 
-import astor
+import astor  # type: ignore
 import pytest
 
 from kahmi.dsl import compile_file, run_file
@@ -17,7 +16,7 @@ examples_dir = os.path.normpath(__file__ + '/../../../examples')
 
 
 @pytest.mark.parametrize("filename", os.listdir(examples_dir))
-def test_examples(filename):
+def test_examples(filename: str) -> None:
   path = os.path.join(examples_dir, filename)
   with open(path) as fp:
     macros: t.List[str] = []
@@ -53,11 +52,11 @@ def test_examples(filename):
 
     expected_output = ''.join(expected_lines or [])
 
-  macros = {x: get_macro_plugin(x)() for x in macros}
-  print(astor.to_source(compile_file(path, macros=macros)))
+  macro_plugins = {x: get_macro_plugin(x)() for x in macros}
+  print(astor.to_source(compile_file(path, macros=macro_plugins)))
 
   buffer = io.StringIO()
   with contextlib.redirect_stdout(buffer):
-    run_file(VoidContext(), {}, filename=path, macros=macros)
+    run_file(VoidContext(), {}, filename=path, macros=macro_plugins)
 
   assert buffer.getvalue() == expected_output
