@@ -20,6 +20,7 @@ requirements = [
   'nr.parsing.core >=1.1.0,<2.0.0',
   'nr.pylang.ast >=0.0.5,<0.1.0',
   'dataclasses >=0.6.0,<1.0.0',
+  'nr.functional >=0.1.0,<1.0.0',
 ]
 
 setuptools.setup(
