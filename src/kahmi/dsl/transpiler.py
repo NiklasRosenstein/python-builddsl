@@ -144,6 +144,32 @@ class Runtime:
     finally:
       del frame
 
+  def configure_object(self, obj: T, closure: t.Callable[[T], None]) -> None:
+    """
+    This method is called for a closure to configure an object.
+    """
+
+    if hasattr(obj, 'configure'):
+      obj.configure(closure)
+    elif isinstance(obj, dict):
+      # TODO(NiklasRosenstein): Maybe we should instead use a wrapper for the same dict.
+      class namespace:
+        def __repr__(self) -> str:
+          return f'namespace({self.__dict__})'
+      temp = namespace
+      for key, value in obj.items():
+        temp.__dict__[key] = value
+      closure(temp)
+      obj.clear()
+      obj.update(temp.__dict__)
+      obj.pop('__doc__', None)
+      obj.pop('__dict__', None)
+      obj.pop('__module__', None)
+      obj.pop('__repr__', None)
+      obj.pop('__weakref__', None)
+    else:
+      closure(obj)
+
   __getitem__ = lookup
 
 
@@ -220,10 +246,7 @@ class Transpiler:
       # the body of the call.
       yield from t.cast(t.List[pyast.stmt], util.compile_snippet(
         f'with {self.runtime_object_name}.pushing(locals()):\n'
-        f'  if hasattr({value_name}, "configure"):\n'
-        f'    {value_name}.configure({func_name})\n'
-        f'  else:\n'
-        f'    {value_name}({func_name})\n',
+        f'  __runtime__.configure_object({value_name}, {func_name})',
         lineno=node.loc.lineno,
         col_offset=node.loc.colno))
 
