@@ -4,7 +4,7 @@ This package implements the Kahmi DSL laguage.
 """
 
 __author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 from .runtime import NameProvider, PropertyOwner, Runtime, run_file
 from .transpiler import Transpiler, compile_file
