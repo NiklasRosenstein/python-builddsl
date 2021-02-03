@@ -3,174 +3,15 @@
 Transpiles a Kahmi DSL AST into a pure Python AST.
 """
 
-import abc
 import ast as pyast
-import builtins
-import contextlib
-import functools
-import threading
-import sys
-import types
 import typing as t
-from itertools import chain
 from dataclasses import dataclass
 
+import astor
 from nr.pylang.ast.dynamic_eval import rewrite_names  # type: ignore
 
 from . import ast, parser, util
 from .macros import MacroPlugin
-
-T = t.TypeVar('T')
-T_Callable = t.TypeVar('T_Callable', bound=t.Callable)
-
-
-class Configurable:
-  """
-  Base class for objects that are configurable via closures. The default implementation of
-  #configure() simply calls the closure with the object.
-  """
-
-  def configure(self: T, closure: t.Callable[[T], None]) -> None:
-    closure(self)
-
-
-class StrictConfigurable(Configurable):
-  """
-  Base class for objects that are configurable via closures and do not accept setting new
-  attributes within the closure.
-  """
-
-  __in_closure: bool = False
-
-  def __setattr__(self, name: str, value: t.Any) -> None:
-    if self.__in_closure:
-      if not hasattr(self, name):
-        raise AttributeError(f'{type(self).__name__} has no attribute {name!r}')
-      if hasattr(type(self), name):
-        class_level_val = getattr(type(self), name)
-        if isinstance(class_level_val, types.FunctionType):
-          raise AttributeError(f'{type(self).__name__}.{name} cannot be overwritten')
-    super().__setattr__(name, value)
-
-  def configure(self: T, closure: t.Callable[[T], None]) -> None:
-    self.__in_closure = True  # type: ignore
-    try:
-      Configurable.configure(self, closure)
-    finally:
-      self.__in_closure = False   # type: ignore
-
-
-class NameProvider(metaclass=abc.ABCMeta):
-
-  @abc.abstractmethod
-  def _name_provider_lookup(self, name: str) -> t.Any:
-    pass
-
-
-class Runtime:
-  """
-  A runtime object supports the execution of a Python module transpiled from the Kahmi DSL. The
-  runtime is a thread-safe object that keeps track of the closure targets and local variables in
-  order to implement the name resolution.
-  """
-
-  def __init__(self, initial: t.Any):
-    self._initial = initial
-    self._threadlocal = threading.local()
-
-  @property
-  def _threadlocal_stack(self) -> t.List[t.Any]:
-    try:
-      return self._threadlocal.stack
-    except AttributeError:
-      stack = self._threadlocal.stack = []
-      if self._initial is not None:
-        stack.append(self._initial)
-      return stack
-
-  def closure(self) -> t.Callable[[T_Callable], T_Callable]:
-    """
-    Mark a function as being a closure. Effectively this just pushes the first argument of the
-    closure on the threadlocal stack for name resolution.
-    """
-
-    def decorator(func):
-      @functools.wraps(func)
-      def wrapper(ctx, *args, **kwargs):
-        with self.pushing(ctx):
-          return func(ctx, *args, **kwargs)
-      return wrapper
-
-    return decorator
-
-  def push(self, ctx: t.Any) -> None:
-    self._threadlocal_stack.append(ctx)
-
-  def pop(self) -> t.Any:
-    return self._threadlocal_stack.pop()
-
-  @contextlib.contextmanager
-  def pushing(self, ctx: t.Any) -> t.Iterator[None]:
-    try:
-      self.push(ctx)
-      yield
-    finally:
-      assert self.pop() is ctx
-
-  def lookup(self, name: str) -> t.Any:
-    """
-    Performs a lookup for a variable. First, it checks the locals of the calling frame. Then, it
-    checks the dictionaries or object's stored on the runtime's thread-local stack. Finally, the
-    calling frame's globals are checked.
-    """
-
-    frame = sys._getframe(1)
-    try:
-      for item in chain([frame.f_locals], reversed(self._threadlocal_stack), [frame.f_globals, builtins]):
-        if isinstance(item, t.Mapping):
-          if name in item:
-            return item[name]
-        else:
-          try:
-            return getattr(item, name)
-          except AttributeError:
-            pass
-          if hasattr(item, '_name_provider_lookup'):
-            try:
-              return item._name_provider_lookup(name)
-            except KeyError:
-              pass
-      raise NameError(name, self._threadlocal_stack)
-    finally:
-      del frame
-
-  def configure_object(self, obj: T, closure: t.Callable[[T], None]) -> None:
-    """
-    This method is called for a closure to configure an object.
-    """
-
-    if hasattr(obj, 'configure'):
-      obj.configure(closure)
-    elif isinstance(obj, dict):
-      # TODO(NiklasRosenstein): Maybe we should instead use a wrapper for the same dict.
-      class namespace:
-        def __repr__(self) -> str:
-          return f'namespace({self.__dict__})'
-      temp = namespace
-      for key, value in obj.items():
-        temp.__dict__[key] = value
-      closure(temp)
-      obj.clear()
-      obj.update(temp.__dict__)
-      obj.pop('__doc__', None)
-      obj.pop('__dict__', None)
-      obj.pop('__module__', None)
-      obj.pop('__repr__', None)
-      obj.pop('__weakref__', None)
-    else:
-      closure(obj)
-
-  __getitem__ = lookup
 
 
 @dataclass
@@ -254,9 +95,9 @@ class Transpiler:
       yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
-    target = self.transpile_target(self.closure_arg_name, node.target, pyast.Store())
-    yield from [x.fdef for x in node.value.lambdas]
-    yield pyast.Assign(targets=[target], value=node.value.expr.body)
+    yield from util.compile_snippet(
+      f'{self.runtime_object_name}.set_object_property('
+      f'    {self.closure_arg_name}, {node.target.name!r}, {astor.to_source(node.value.expr.body)})')
 
   def transpile_let(self, node: ast.Let) -> t.Iterator[pyast.stmt]:
     target = self.transpile_target(None, node.target, pyast.Store())
@@ -290,22 +131,6 @@ class Transpiler:
     return [x.fdef for x in node.lambdas], node.expr.body
 
 
-def run_file(
-  context: t.Any,
-  globals: t.Dict[str, t.Any],
-  filename: str,
-  fp: t.Optional[t.TextIO] = None,
-  macros: t.Optional[t.Dict[str, MacroPlugin]] = None,
-) -> None:
-
-  globals['self'] = context
-  globals['__runtime__'] = Runtime(context)
-
-  module = compile_file(filename, fp, macros)
-  code = compile(module, filename=filename, mode='exec')
-  exec(code, globals)
-
-
 def compile_file(
   filename: str,
   fp: t.Optional[t.TextIO] = None,
@@ -321,9 +146,9 @@ def compile_file(
 
 
 __all__ = [
-  'Configurable',
-  'StrictConfigurable',
   'NameProvider',
+  'PropertyOwner',
+  'Runtime',
   'Transpiler',
   'run_file',
   'compile_file',
