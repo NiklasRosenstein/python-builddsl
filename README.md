@@ -180,15 +180,13 @@ buildscript {
 ```python
 @__runtime__.closure()
 def __configure_buildscript(self):
-    self.dependencies = ['kahmi-python']
+    __runtime__.set_object_property(self, 'dependencies', ['kahmi-python'])
 
 
 __configure_buildscript_self_target = __runtime__['buildscript']
 with __runtime__.pushing(__runtime__['locals']()):
-    if __runtime__['hasattr'](__configure_buildscript_self_target, 'configure'):
-        __configure_buildscript_self_target.configure(__configure_buildscript)
-    else:
-        __configure_buildscript_self_target(__configure_buildscript)
+    __runtime__.configure_object(__configure_buildscript_self_target,
+        __configure_buildscript)
 ```
 
 ---
