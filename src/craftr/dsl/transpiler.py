@@ -7,7 +7,7 @@ import ast as pyast
 import typing as t
 from dataclasses import dataclass
 
-import astor
+import astor  # type: ignore
 from nr.pylang.ast.dynamic_eval import rewrite_names  # type: ignore
 
 from . import ast, parser, util
@@ -95,9 +95,11 @@ class Transpiler:
       yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
-    yield from util.compile_snippet(
+    stmts = util.compile_snippet(
       f'{self.runtime_object_name}.set_object_property('
       f'    {self.closure_arg_name}, {node.target.name!r}, {astor.to_source(node.value.expr.body)})')
+    assert len(stmts) == 1
+    yield t.cast(pyast.stmt, stmts[0])
 
   def transpile_let(self, node: ast.Let) -> t.Iterator[pyast.stmt]:
     target = self.transpile_target(None, node.target, pyast.Store())

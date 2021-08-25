@@ -15,6 +15,13 @@ T = t.TypeVar('T')
 T_Callable = t.TypeVar('T_Callable', bound=t.Callable)
 
 
+class Configurable(metaclass=abc.ABCMeta):
+
+  @abc.abstractmethod
+  def configure(self, closure: t.Callable[[t.Any], t.Any]) -> t.Any:
+    pass
+
+
 class NameProvider(metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
@@ -92,6 +99,7 @@ class Runtime:
       # If the current frame is a class body, we take the parent frame into account (where the
       # class is declared in.
       if frame.f_code.co_name != '<module>' and frame.f_code.co_flags == 64:  # NOFREE
+        assert frame.f_back
         prefix.append(frame.f_back.f_locals)
       for item in chain(prefix, reversed(self._threadlocal_stack), [frame.f_globals, builtins]):
         if isinstance(item, t.Mapping):
@@ -111,13 +119,13 @@ class Runtime:
     finally:
       del frame
 
-  def configure_object(self, obj: T, closure: t.Callable[[T], None]) -> None:
+  def configure_object(self, obj: T, closure: t.Callable[[T], t.Any]) -> None:
     """
     This method is called for a closure to configure an object.
     """
 
-    if hasattr(obj, 'configure'):  # NameProvider
-      obj.configure(closure)
+    if hasattr(obj, 'configure'):  # Configurable
+      t.cast(Configurable, obj).configure(closure)
     elif isinstance(obj, dict):
       # TODO(NiklasRosenstein): Maybe we should instead use a wrapper for the same dict.
       class namespace:
@@ -126,7 +134,7 @@ class Runtime:
       temp = namespace
       for key, value in obj.items():
         temp.__dict__[key] = value
-      closure(temp)
+      closure(t.cast(T, temp))
       obj.clear()
       obj.update(temp.__dict__)
       obj.pop('__doc__', None)
@@ -140,7 +148,7 @@ class Runtime:
   def set_object_property(self, obj: T, name, value: t.Any) -> None:
     if hasattr(obj, '_set_property_value'):  # PropertyOwner
       try:
-        obj._set_property_value(name, value)
+        t.cast(PropertyOwner, obj)._set_property_value(name, value)
         return
       except AttributeError:
         pass

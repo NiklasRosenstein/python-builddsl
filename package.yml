@@ -14,3 +14,10 @@ requirements:
 entrypoints:
   craftr.dsl.macros:
   - yaml = craftr.dsl.macros.yaml:YamlMacro
+test-drivers:
+- type: mypy
+- type: pytest
+test-requirements:
+- PyYAML
+- types-PyYAML
+- types-setuptools
