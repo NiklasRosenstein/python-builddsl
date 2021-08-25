@@ -31,7 +31,7 @@ class PropertyOwner(metaclass=abc.ABCMeta):
 
 class Runtime:
   """
-  A runtime object supports the execution of a Python module transpiled from the Kahmi DSL. The
+  A runtime object supports the execution of a Python module transpiled from the craftr DSL. The
   runtime is a thread-safe object that keeps track of the closure targets and local variables in
   order to implement the name resolution.
   """

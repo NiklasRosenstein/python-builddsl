@@ -1,6 +1,6 @@
 
 """
-This package implements the Kahmi DSL laguage.
+This package implements the craftr DSL laguage.
 """
 
 __author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'

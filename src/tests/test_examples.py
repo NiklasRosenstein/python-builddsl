@@ -7,9 +7,9 @@ import typing as t
 import astor  # type: ignore
 import pytest
 
-from kahmi.dsl import compile_file, run_file
-from kahmi.dsl.__main__ import VoidContext
-from kahmi.dsl.macros import get_macro_plugin
+from craftr.dsl import compile_file, run_file
+from craftr.dsl.__main__ import VoidContext
+from craftr.dsl.macros import get_macro_plugin
 
 
 examples_dir = os.path.normpath(__file__ + '/../../../examples')

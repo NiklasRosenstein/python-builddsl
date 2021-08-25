@@ -1,5 +1,5 @@
 ####
-# A simple hello world program in Kahmi DSL that shows how closures are executed.
+# A simple hello world program in craftr DSL that shows how closures are executed.
 ####
 #
 # expected output:

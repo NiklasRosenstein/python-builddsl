@@ -21,7 +21,7 @@ class MacroPlugin(metaclass=abc.ABCMeta):
     """
 
 
-GROUP_ID = 'kahmi.dsl.macros'
+GROUP_ID = 'craftr.dsl.macros'
 
 
 def get_macro_plugin(name: str) -> t.Type[MacroPlugin]:

@@ -7,6 +7,8 @@ import os
 import setuptools
 import sys
 
+command = sys.argv[1] if len(sys.argv) >= 2 else None
+
 readme_file = 'README.md'
 if os.path.isfile(readme_file):
   with io.open(readme_file, encoding='utf8') as fp:
@@ -24,11 +26,11 @@ requirements = [
 ]
 
 setuptools.setup(
-  name = 'kahmi-dsl',
+  name = 'craftr-dsl',
   version = '0.1.2',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
-  description = 'Parser and transpiler for the Kahmi DSL.',
+  description = 'Parser and transpiler for the craftr DSL.',
   long_description = long_description,
   long_description_content_type = 'text/markdown',
   url = None,
@@ -42,8 +44,8 @@ setuptools.setup(
   python_requires = '>=3.6.0,<4.0.0',
   data_files = [],
   entry_points = {
-    'kahmi.dsl.macros': [
-      'yaml = kahmi.dsl.macros.yaml:YamlMacro',
+    'craftr.dsl.macros': [
+      'yaml = craftr.dsl.macros.yaml:YamlMacro',
     ]
   },
   cmdclass = {},

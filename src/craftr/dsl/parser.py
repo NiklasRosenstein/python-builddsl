@@ -50,7 +50,7 @@ class LambdaRule(Rule):
 
 class Parser:
   """
-  This parser constructs an AST from Kahmi DSL code.
+  This parser constructs an AST from craftr DSL code.
   """
 
   @staticmethod

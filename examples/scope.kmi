@@ -5,11 +5,11 @@
 #
 # expected output:
 #
-# ['kahmi-python']
+# ['craftr-python']
 # False
 # True
 
-dependencies = ["kahmi-python"]
+dependencies = ["craftr-python"]
 print(dependencies)
 print('dependencies' in locals())
 print('dependencies' in vars(self))

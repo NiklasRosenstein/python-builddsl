@@ -5,11 +5,11 @@
 # enabled macros: yaml
 # expected output:
 #
-# ['kahmi-git', 'kahmi-python']
+# ['craftr-git', 'craftr-python']
 
 let dependencies = !yaml {
-  - kahmi-git
-  - kahmi-python
+  - craftr-git
+  - craftr-python
 }
 
 print(dependencies)

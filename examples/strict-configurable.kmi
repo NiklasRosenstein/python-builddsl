@@ -3,7 +3,7 @@
 ####
 
 let strict = () => {
-  from kahmi.dsl import StrictConfigurable
+  from craftr.dsl import StrictConfigurable
 
   class Obj(StrictConfigurable):
     def __init__(self):

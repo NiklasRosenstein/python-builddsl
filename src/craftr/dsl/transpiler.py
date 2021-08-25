@@ -1,6 +1,6 @@
 
 """
-Transpiles a Kahmi DSL AST into a pure Python AST.
+Transpiles a craftr DSL AST into a pure Python AST.
 """
 
 import ast as pyast

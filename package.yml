@@ -1,8 +1,8 @@
-name: kahmi-dsl
+name: craftr-dsl
 version: 0.1.2
 author: Niklas Rosenstein <rosensteinniklas@gmail.com>
-modulename: kahmi.dsl
-description: Parser and transpiler for the Kahmi DSL.
+modulename: craftr.dsl
+description: Parser and transpiler for the craftr DSL.
 typed: true
 requirements:
 - python ^3.6
@@ -12,5 +12,5 @@ requirements:
 - dataclasses ^0.6
 - nr.functional ^0.1.0
 entrypoints:
-  kahmi.dsl.macros:
-  - yaml = kahmi.dsl.macros.yaml:YamlMacro
+  craftr.dsl.macros:
+  - yaml = craftr.dsl.macros.yaml:YamlMacro

@@ -23,7 +23,7 @@ class Location:
 @dataclass
 class Node:
   """
-  Base class for Kahmi DSL AST nodes.
+  Base class for craftr DSL AST nodes.
   """
 
   #: The node's parsing location.
@@ -98,12 +98,12 @@ class Call(Node):
                       <Target> <Call-Expr>
 
   In the below example, we call the function `buildscript()` on the current context (which in the
-  case of the Kahmi build script is a #Project instance at the root level). The `buildscript()`
+  case of the craftr build script is a #Project instance at the root level). The `buildscript()`
   function returns a #Buildscript object, and inside the block we set the #dependencies attribute
   to a list of Python package names.
 
       buildscript {
-        dependencies = [ "kahmi-python" ]
+        dependencies = [ "craftr-python" ]
       }
   """
 

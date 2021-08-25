@@ -9,7 +9,7 @@ import astor  # type: ignore
 from . import run_file, compile_file
 from .macros import get_macro_plugin
 
-parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m kahmi.dsl')
+parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')
 parser.add_argument('file', nargs='?')
 parser.add_argument('-c', '--context', metavar='ENTRYPOINT')
 parser.add_argument('-E', '--transpile', action='store_true')

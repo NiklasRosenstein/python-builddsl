@@ -1,17 +1,17 @@
-# kahmi-dsl
+# craftr-dsl
 
-This is a Python-based configuration language for the [Kahmi](https://github.com/kahmi-build)
+This is a Python-based configuration language for the [craftr](https://github.com/craftr-build)
 build system that is heavily inspired by Groovy and Gradle.
 
 __Example:__
 
 ```python
 buildscript {
-  dependencies = ["kahmi-git", "kahmi-cxx"]
+  dependencies = ["craftr-git", "craftr-cxx"]
 }
 
-let cxx = load("kahmi-cxx")
-let git = load("kahmi-git")
+let cxx = load("craftr-cxx")
+let git = load("craftr-git")
 
 name = "myproject"
 version = git.version()
@@ -24,10 +24,10 @@ cxx.build("main") {
 
 ## Syntax & Semantics
 
-The Kahmi DSL is not a strict superset of the Python language, instead it wraps Python code and
+The craftr DSL is not a strict superset of the Python language, instead it wraps Python code and
 swaps between DSL parsing and Python code parsing.
 
-### Kahmi DSL Syntax
+### craftr DSL Syntax
 
 1. **Define a local variable with the `let` Keyword**
 
@@ -59,7 +59,7 @@ swaps between DSL parsing and Python code parsing.
     print("Hello, World!")  # Call without body
 
     buildscript {
-      dependencies = ["kahmi-python"]
+      dependencies = ["craftr-python"]
     }
 
     cxx.build("main") {
@@ -67,16 +67,16 @@ swaps between DSL parsing and Python code parsing.
     }
     ```
 
-    > At the root level, every Kahmi script is basically a closure that is executed against the
+    > At the root level, every craftr script is basically a closure that is executed against the
     > main context object.
 
 ### Python Syntax Extensions
 
-When parsing a Python expression, Kahmi injects support for multi-line lambdas and macros.
+When parsing a Python expression, craftr injects support for multi-line lambdas and macros.
 
 1. **Multi-line lambdas**
 
-    The Kahmi DSL parser injects the ability to define multi-line lambdas in any Python
+    The craftr DSL parser injects the ability to define multi-line lambdas in any Python
     expression. The lambda syntax is inspired by Javascript/Typescript and uses `=>` as
     the lambda arrow operation to connect the argument definition with the lambda body.
 
@@ -99,28 +99,28 @@ When parsing a Python expression, Kahmi injects support for multi-line lambdas a
 
 2. **Macros**
 
-    Macros are plugins that can be enabled in the Kahmi DSL parser to implement custom parsing
-    logic following a macro identifier. The Kahmi DSL parser comes with a YAML plugin out of the
+    Macros are plugins that can be enabled in the craftr DSL parser to implement custom parsing
+    logic following a macro identifier. The craftr DSL parser comes with a YAML plugin out of the
     box:
 
     ```python
     buildscript {
       dependencies = !yaml {
-        - kahmi-git
-        - kahmi-python
+        - craftr-git
+        - craftr-python
       }
     }
     ```
 
 3. **Dynamic name lookup**
 
-    Names are resolved slightly different in Kahmi Python expressions. The local scope will always
+    Names are resolved slightly different in craftr Python expressions. The local scope will always
     be resolved first. Subsequently, the current context object's members are checked, then the
     parent closure's local variables and context object, etc. Then finally, the global variables
     and builtins.
 
     ```python
-    dependencies = ["kahmi-python"]
+    dependencies = ["craftr-python"]
     print(dependencies)
     print('dependencies' in locals())
     print('dependencies' in vars(self))
@@ -132,8 +132,8 @@ When parsing a Python expression, Kahmi injects support for multi-line lambdas a
 
 ## Built-ins
 
-Kahmi only provides two additional built-in functions on top of what is provided by Python, and
-they are only necessary for the execution of Kahmi's generated Python code.
+craftr only provides two additional built-in functions on top of what is provided by Python, and
+they are only necessary for the execution of craftr's generated Python code.
 
 | Name | Description |
 | ---- | ----------- |
@@ -142,14 +142,14 @@ they are only necessary for the execution of Kahmi's generated Python code.
 
 ## Under the hood
 
-Kahmi comes with a simple cli that allows you to run any Kahmi script, but given the limited
+craftr comes with a simple cli that allows you to run any craftr script, but given the limited
 ability to override the root context object it is expected that it does not serve much use outside
 of debugging and development.
 
-    $ python -m kahmi.dsl examples/hello.kmi
+    $ python -m craftr.dsl examples/hello.kmi
 
-Using the `-E` option, you can retrieve the Python code that a Kahmi file is transpiled to. This
-is especially useful to understand how Kahmi constructs are converted into Python. Below are some
+Using the `-E` option, you can retrieve the Python code that a craftr file is transpiled to. This
+is especially useful to understand how craftr constructs are converted into Python. Below are some
 examples:
 
 ```python
@@ -173,14 +173,14 @@ __runtime__['print'](msg)
 
 ```python
 buildscript {
-  dependencies = ["kahmi-python"]
+  dependencies = ["craftr-python"]
 }
 ```
 
 ```python
 @__runtime__.closure()
 def __configure_buildscript(self):
-    __runtime__.set_object_property(self, 'dependencies', ['kahmi-python'])
+    __runtime__.set_object_property(self, 'dependencies', ['craftr-python'])
 
 
 __configure_buildscript_self_target = __runtime__['buildscript']
