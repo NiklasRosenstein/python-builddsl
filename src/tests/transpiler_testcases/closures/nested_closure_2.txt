@@ -1,29 +1,64 @@
 === TEST nested_closure_2 ===
 
-for i in range(10):
-  if True:
+import contextlib
+
+for i in range(3):
+  if False:
     pass
-  elif False:
+  elif True:
     class MyClass:
-      with something_going_on():
+      __repr__ = { return 'MyClass instance' }
+      def __call__(self, closure):
+        closure(self)
+      with contextlib.ExitStack():
         def say_hello(self) -> None:
           self {
             print 'Hello,', self
+
+            def something_useful():
+              return () -> 42
+
+            print(something_useful()())
           }
 
+    MyClass().say_hello()
+
 === EXPECTS ===
-for i in range(10):
-    if True:
+import contextlib
+for i in range(3):
+    if False:
         pass
-    elif False:
+    elif True:
 
 
         class MyClass:
-            with something_going_on():
+
+            def _closure_1(self):
+                return 'MyClass instance'
+            __repr__ = _closure_1
+
+            def __call__(self, closure):
+                closure(self)
+            with contextlib.ExitStack():
 
                 def say_hello(self) ->None:
 
-                    def _closure_1(self):
+                    def _closure_2(self):
                         print('Hello,', self)
-                    self(_closure_1)
+
+                        def something_useful():
+
+                            def _closure_2_closure_2():
+                                return 42
+                            return _closure_2_closure_2
+                        print(something_useful()())
+                    self(_closure_2)
+        MyClass().say_hello()
+=== OUTPUTS ===
+Hello, MyClass instance
+42
+Hello, MyClass instance
+42
+Hello, MyClass instance
+42
 === END ===

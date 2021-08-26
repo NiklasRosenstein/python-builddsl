@@ -5,7 +5,7 @@ from craftr.dsl.rewrite import Rewriter, SyntaxError
 from .utils.testcaseparser import CaseData, cases_from
 
 
-@cases_from(Path(__file__).parent / 'rewriter_testcases')
+@cases_from(Path(__file__).parent / 'rewriter_testcases', can_have_outputs=False)
 def test_parser(case_data: CaseData) -> None:
   print('='*30)
   print(case_data.input)

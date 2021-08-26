@@ -16,9 +16,11 @@ class CaseData:
   expects: str
   expects_line: int
   expects_syntax_error: bool
+  outputs: t.Optional[str]
+  outputs_line: t.Optional[int]
 
 
-def parse_testcase_file(content: str, filename: str) -> t.Iterator[CaseData]:
+def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> t.Iterator[CaseData]:
   """
   Parses a Craftr DSL parser test case file. Such a file must be of the following form:
 
@@ -58,22 +60,41 @@ def parse_testcase_file(content: str, filename: str) -> t.Iterator[CaseData]:
       expects_body = next(it)
       if expects_body.type != Type.Body:
         raise ValueError(f'{filename}: expected EXPECTS section body at line {test_body.line}')
-      end_section = next(it)
-      if end_section.type != Type.Marker or not (m := re.match(r'END$', end_section.value)):
-        raise ValueError(f'{filename}: expected END section at line {end_section.line}, got {end_section}')
+      next_section = next(it)
+      if next_section.type != Type.Marker or next_section.value not in ('OUTPUTS', 'END'):
+        raise ValueError(f'{filename}: expected OUTPUTS|END section at line {next_section.line}, got {next_section}')
+      if next_section.value == 'OUTPUTS' and can_have_outputs:
+        outputs_body = next(it)
+        if outputs_body.type != Type.Body:
+          raise ValueError(f'{filename}: expected OUTPUT section body at line {outputs_body.line}')
+        next_section = next(it)
+      else:
+        outputs_body = None
+      if next_section.type != Type.Marker or next_section.value != 'END':
+        raise ValueError(f'{filename}: expected END section at line {next_section.line}, got {next_section}')
       if not test_disabled:
-        yield CaseData(filename, test_name, test_body.value, test_body.line, expects_body.value, expects_body.line, bool(expects_syntax_error))
+        yield CaseData(
+          filename,
+          test_name,
+          test_body.value,
+          test_body.line,
+          expects_body.value,
+          expects_body.line,
+          bool(expects_syntax_error),
+          outputs_body.value if outputs_body else None,
+          outputs_body.line if outputs_body else None,
+          )
   except StopIteration:
     raise ValueError(f'{filename}: incomplete test case section')
 
 
-def cases_from(path: Path) -> t.Callable[[t.Callable], t.Callable]:
+def cases_from(path: Path, can_have_outputs: bool) -> t.Callable[[t.Callable], t.Callable]:
   """
   Decorator for a test function to parametrize it wil the test cases from a directory.
   """
 
   def _load(path):
-    return {t.name: t for t in parse_testcase_file(path.read_text(), str(path))}
+    return {t.name: t for t in parse_testcase_file(path.read_text(), str(path), can_have_outputs)}
 
   test_cases = {}
   for root, dirs, files in os.walk(path):

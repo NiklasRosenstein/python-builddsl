@@ -9,11 +9,13 @@ def test_testcaseparser():
     foo bar
     === EXPECTS ===
     baz
+    === OUTPUTS ===
+    spam
     === END ===
   ''')
 
-  result = list(parse_testcase_file(content, '<string>'))
+  result = list(parse_testcase_file(content, '<string>', True))
 
   assert result == [
-    CaseData('<string>', 'abc', 'foo bar', 2, 'baz', 4, False)
+    CaseData('<string>', 'abc', 'foo bar', 2, 'baz', 4, False, 'spam', 6)
   ]
