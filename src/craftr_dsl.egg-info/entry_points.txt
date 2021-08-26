@@ -1,3 +1,0 @@
-[craftr.dsl.macros]
-yaml = craftr.dsl.macros.yaml:YamlMacro
-

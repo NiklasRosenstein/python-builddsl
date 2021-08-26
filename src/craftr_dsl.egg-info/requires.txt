@@ -1,6 +1,0 @@
-astor<1.0.0,>=0.8.1
-dataclasses<1.0.0,>=0.6.0
-nr.functional<1.0.0,>=0.1.0
-nr.parsing.core<3.0.0,>=2.0.2
-nr.pylang.ast<0.1.0,>=0.0.5
-termcolor<2.0.0,>=1.1.0
