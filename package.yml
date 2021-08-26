@@ -11,8 +11,6 @@ requirements:
 - nr.pylang.ast ~0.0.5
 - dataclasses ^0.6
 - nr.functional ^0.1.0
-- nr.preconditions ^0.0.4
-- nr.proxy ^1.0.4
 test-requirements:
 - PyYAML
 - types-PyYAML

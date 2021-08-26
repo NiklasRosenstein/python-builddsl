@@ -1,14 +1,9 @@
 
 import abc
-import builtins
-import contextlib
-import functools
 import sys
-import threading
 import typing as t
-from itertools import chain
 
-from .closure import Closure, ClosureContextProxy, ResolveStrategy
+from .closure import Closure
 from .macros import MacroPlugin
 from .transpiler import compile_file
 
@@ -50,7 +45,7 @@ class Runtime:
     """
 
     def decorator(func):
-      return Closure(func, sys._getframe(1), owner, delegate, ResolveStrategy.DELEGATE_FIRST)
+      return Closure(func, owner, delegate)
 
     return decorator
 
@@ -70,7 +65,7 @@ def run_file(
     exec(code, globals)
 
   globals['__runtime__'] = Runtime()
-  closure = Closure(_inner, sys._getframe(1), None, delegate)
+  closure = Closure(_inner, None, delegate)
   closure()
 
 

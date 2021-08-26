@@ -7,7 +7,7 @@
 #
 # ['craftr-git', 'craftr-python']
 
-let dependencies = !yaml {
+dependencies = !yaml {
   - craftr-git
   - craftr-python
 }

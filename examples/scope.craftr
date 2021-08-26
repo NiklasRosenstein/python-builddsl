@@ -6,10 +6,10 @@
 # expected output:
 #
 # ['craftr-python']
-# False
+# ['craftr-python']
 # True
 
 dependencies = ["craftr-python"]
 print(dependencies)
+print(locals()['dependencies'])
 print('dependencies' in locals())
-print('dependencies' in vars(self))

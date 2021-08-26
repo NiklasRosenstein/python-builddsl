@@ -6,10 +6,10 @@
 #
 # Hello, World!
 
-let closureRunner = (closure) => {
+closureRunner = (closure) => {
   closure('World!')
 }
 
-closureRunner {=
-  print('Hello,', self)
+closureRunner {
+  print('Hello,', self())
 }

@@ -8,7 +8,6 @@ import astor  # type: ignore
 import pytest
 
 from craftr.dsl import compile_file, run_file
-from craftr.dsl.__main__ import VoidContext
 from craftr.dsl.macros import get_macro_plugin
 
 
@@ -53,10 +52,16 @@ def test_examples(filename: str) -> None:
     expected_output = ''.join(expected_lines or [])
 
   macro_plugins = {x: get_macro_plugin(x)() for x in macros}
+  print()
+  print(':' * 100)
   print(astor.to_source(compile_file(path, macros=macro_plugins)))
 
   buffer = io.StringIO()
   with contextlib.redirect_stdout(buffer):
-    run_file(VoidContext(), {}, filename=path, macros=macro_plugins)
+    run_file(None, {}, filename=path, macros=macro_plugins)
+
+  print('.' * 100)
+  print(buffer.getvalue())
+  print()
 
   assert buffer.getvalue() == expected_output

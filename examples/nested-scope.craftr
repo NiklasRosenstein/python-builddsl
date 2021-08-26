@@ -6,24 +6,22 @@
 #
 # 42
 # foobar
+# 42
 # 99
 # spam and eggs
+# 42
 
-let ctx = () => {
-  class Configurable:
-    def configure(self, closure):
-      closure(self)
-  return Configurable()
-}
-
-let a = 42
+a = 42
 b = 'foobar'
 print(a)
 print(b)
 
-ctx() {
+a {
   a = 99
-  let b = 'spam and eggs'
+  b = 'spam and eggs'
+  print(self())
   print(a)
   print(b)
 }
+
+print(a)
