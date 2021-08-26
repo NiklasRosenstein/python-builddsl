@@ -5,7 +5,7 @@ import typing as t
 from dataclasses import dataclass
 from pathlib import Path
 import pytest
-from .sectionfileparser import parse_section_file, Type
+from .sectionfileparser import Section, parse_section_file, Type
 
 @dataclass
 class CaseData:
@@ -63,13 +63,12 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
       next_section = next(it)
       if next_section.type != Type.Marker or next_section.value not in ('OUTPUTS', 'END'):
         raise ValueError(f'{filename}: expected OUTPUTS|END section at line {next_section.line}, got {next_section}')
+      outputs_body: t.Optional[Section] = None
       if next_section.value == 'OUTPUTS' and can_have_outputs:
         outputs_body = next(it)
         if outputs_body.type != Type.Body:
           raise ValueError(f'{filename}: expected OUTPUT section body at line {outputs_body.line}')
         next_section = next(it)
-      else:
-        outputs_body = None
       if next_section.type != Type.Marker or next_section.value != 'END':
         raise ValueError(f'{filename}: expected END section at line {next_section.line}, got {next_section}')
       if not test_disabled:
