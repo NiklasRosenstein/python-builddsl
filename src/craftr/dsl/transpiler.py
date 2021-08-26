@@ -56,8 +56,8 @@ class Transpiler:
     if node.body:
       func_name = node.id
       body = list(self.transpile_nodes(node.body))
-      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.delegate)')[0]).value
-      dec.args.append(target)
+      dec = t.cast(pyast.Expr, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.delegate)')[0]).value
+      t.cast(pyast.Call, dec).args.append(target)
       yield util.function_def(
         func_name,
         [self.closure_arg_name],
@@ -76,7 +76,7 @@ class Transpiler:
         col_offset=node.loc.colno)
 
     if node.body:
-      yield from util.compile_snippet(f'{node.id}()')
+      yield from t.cast(t.Iterable[pyast.stmt], util.compile_snippet(f'{node.id}()'))
 
     else:
       yield pyast.Expr(target)

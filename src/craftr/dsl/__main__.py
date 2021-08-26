@@ -4,10 +4,9 @@ import importlib
 import os
 import sys
 
-import astor
+import astor  # type: ignore
 
 from . import run_file, compile_file
-from .closure import Closure  # type: ignore
 from .macros import get_macro_plugin
 
 parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')

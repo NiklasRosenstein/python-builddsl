@@ -159,7 +159,7 @@ class Parser:
       self.error(ast.Target, Token.NAME)
     return ast.Target(loc, '.'.join(names))
 
-  def parse_assign(self, target: ast.Target) -> ast.Assign:
+  def parse_assign(self, target: ast.Expr) -> ast.Assign:
     if self._lexer.token.tv != (Token.CONTROL, '='):
       self.error(ast.Assign, Token.CONTROL, '=')
     self._lexer.next()
