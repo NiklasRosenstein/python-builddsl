@@ -1,0 +1,29 @@
+=== TEST nested_closure_2 ===
+
+for i in range(10):
+  if True:
+    pass
+  elif False:
+    class MyClass:
+      with something_going_on():
+        def say_hello(self) -> None:
+          self {
+            print 'Hello,', self
+          }
+
+=== EXPECTS ===
+for i in range(10):
+    if True:
+        pass
+    elif False:
+
+
+        class MyClass:
+            with something_going_on():
+
+                def say_hello(self) ->None:
+
+                    def _closure_1(self):
+                        print('Hello,', self)
+                    self(_closure_1)
+=== END ===
