@@ -39,7 +39,7 @@ def _closure_2(self):
 world(_closure_2)
 ```
 
-Abnd evaluates to
+Andg a evaluates to
 
 ```py
 # $ python -m craftr.dsl hello.craftr
