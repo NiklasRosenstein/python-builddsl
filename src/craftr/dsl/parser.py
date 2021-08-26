@@ -385,13 +385,13 @@ class Parser:
     if self._lexer.token.type in ('eof', Token.NEWLINE):
       return expr
 
-    is_call = False
+    is_closure = False
     lambdas: t.List[ast.Lambda] = []
     args: t.Optional[t.List[pyast.expr]] = None
     body: t.List[ast.Node] = []
 
     if self._lexer.token.tv == (Token.CONTROL, '('):
-      is_call = True
+      is_closure = True
       expr = self.parse_expr(PyParseMode.CALL)
       if isinstance(expr.expr.body, pyast.Tuple):
         args = expr.expr.body.elts
@@ -400,7 +400,7 @@ class Parser:
       lambdas += expr.lambdas
 
     if self._lexer.token.tv == (Token.CONTROL, '{'):
-      is_call = True
+      is_closure = True
       self._lexer.next()
       while self._lexer.token.tv != (Token.CONTROL, '}'):
         node = self.parse_statement()
@@ -410,11 +410,11 @@ class Parser:
         body.append(node)
       self._lexer.next()
 
-    if not is_call:
+    if not is_closure:
       # TODO (@NiklasRosenstein): The expr here can be more than one target.
       return self.parse_assign(expr)
 
-    return ast.Call(expr.loc, self._generate_unique_name('_closure_', expr.loc), expr, lambdas, args, body)
+    return ast.Closure(expr.loc, self._generate_unique_name('_closure_', expr.loc), expr, lambdas, args, body)
 
 
   def parse(self) -> ast.Module:

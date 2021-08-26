@@ -90,23 +90,32 @@ class Target(Node):
 # TODO (@NiklasRosenstein): Rename to Closure
 
 @dataclass
-class Call(Node):
+class Closure(Node):
   """
-  A call node allows you to call a function in the current context and optionally entering a new
-  context for the return value of that function. The syntax is as follows:
+  A closure represents a code block that is executed in the context of an "owner" and "delegate". The
+  owner is defined by the context in which the closure is defined, wheras the delegate is defined by
+  the expression that the closure is defined with.
 
-      <Call-Expr> ::= '(' [ <Expr> ( ',' <Expr> )* ] ','? ')'
-      <Call>      ::= <Target> [ <Call-Expr> ] '{' <Stmt>* '}' |
-                      <Target> <Call-Expr>
+  ```py
+  'Hello, World' {
+    print(self())
+  }
+  ```
 
-  In the below example, we call the function `buildscript()` on the current context (which in the
-  case of the craftr build script is a #Project instance at the root level). The `buildscript()`
-  function returns a #Buildscript object, and inside the block we set the #dependencies attribute
-  to a list of Python package names.
+  In the above example, the string `'Hello, World'` is the delegate. The context in which the closure
+  is defined, in this case the global module context, is the owner of the closure. The `self` argument
+  is a #craftr.dsl.closure.ClosureContextProxy which gives access to the underlying closure, and proxies
+  attribute access to the delegate and owner object.
 
-      buildscript {
-        dependencies = [ "craftr-python" ]
-      }
+  The general construct of a closure is as follows:
+
+  ```
+  <Expr> '{'
+    <Stmt ...>
+  '}'
+  ```
+
+  Closures can be nested. The owner of the inner closure will be the delegate of the outer closure.
   """
 
   #: A unique ID for the call.

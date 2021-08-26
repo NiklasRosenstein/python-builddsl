@@ -36,8 +36,8 @@ class Transpiler:
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
     for node in nodes:
-      if isinstance(node, ast.Call):
-        yield from self.transpile_call(node)
+      if isinstance(node, ast.Closure):
+        yield from self.transpile_closure(node)
       elif isinstance(node, ast.Assign):
         yield from self.transpile_assign(node)
       elif isinstance(node, ast.Expr):
@@ -47,7 +47,7 @@ class Transpiler:
       else:
         raise RuntimeError(f'encountered unexpected node: {node!r}')
 
-  def transpile_call(self, node: ast.Call) -> t.Iterator[pyast.stmt]:
+  def transpile_closure(self, node: ast.Closure) -> t.Iterator[pyast.stmt]:
     yield from (x.fdef for x in node.lambdas)
 
     lambdas, target = self.transpile_expr(node.target)
