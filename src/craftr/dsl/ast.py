@@ -5,6 +5,7 @@ import typing as t
 from dataclasses import dataclass, field
 
 import astor  # type: ignore
+from nr.preconditions import check_instance_of
 
 
 @dataclass
@@ -40,6 +41,9 @@ class Lambda(Node):
   id: str
   fdef: pyast.FunctionDef
 
+  def __post_init__(self) -> None:
+    check_instance_of(self.fdef, pyast.FunctionDef)
+
   def __repr__(self):
     return f'Lambda(func={astor.to_source(self.fdef)!r}'
 
@@ -51,43 +55,26 @@ class Expr(Node):
   """
 
   lambdas: t.List[Lambda]
-  expr: pyast.Expression
+  expr: pyast.expr
+
+  def __post_init__(self) -> None:
+    check_instance_of(self.expr, pyast.expr)
 
   def __repr__(self):
     return f'Expr(lambdas={self.lambdas!r}, code={astor.to_source(self.expr)!r}'
 
 
 @dataclass
-class Target(Node):
-  """
-  A target is any valid Python identifier plus (for attribute access).
-  """
+class Stmt(Node):
+  lambdas: t.List[Lambda]
+  stmt: pyast.stmt
 
-  name: str
+  def __post_init__(self) -> None:
+    check_instance_of(self.stmt, pyast.stmt)
 
-  def set(self, context: t.Union[t.Dict, t.Any], value: t.Any) -> None:
-    parts = self.name.split('.')
-    for part in parts[:-1]:
-      if isinstance(context, t.Mapping):
-        context = context[part]
-      else:
-        context = getattr(context, part)
-    if isinstance(context, t.MutableMapping):
-      context[parts[-1]] = value
-    else:
-      setattr(context, parts[-1], value)
+  def __repr__(self):
+    return f'Stmt(lambdas={self.lambdas!r}, code={astor.to_source(self.stmt)!r}'
 
-  def get(self, context: t.Union[t.Dict, t.Any]) -> t.Any:
-    parts = self.name.split('.')
-    for part in parts:
-      if isinstance(context, t.Mapping):
-        context = context[part]
-      else:
-        context = getattr(context, part)
-    return context
-
-
-# TODO (@NiklasRosenstein): Rename to Closure
 
 @dataclass
 class Closure(Node):
@@ -133,20 +120,8 @@ class Closure(Node):
   #: A list of statements to execute in the block.
   body: t.List[Node]
 
-
-@dataclass
-class Assign(Node):
-  """
-  Assign a value to a member of the current context. The syntax is as follows:
-
-      <Assign> ::= <Target> '=' <Expr>
-  """
-
-  #: The target of the assignment.
-  target: Expr
-
-  #: THe value to assign.
-  value: Expr
+  def __post_init__(self) -> None:
+    check_instance_of(self.target, Expr)
 
 
 @dataclass

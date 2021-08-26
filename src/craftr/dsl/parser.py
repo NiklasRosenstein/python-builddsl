@@ -146,26 +146,7 @@ class Parser:
         continue
       return indent
 
-  def parse_target(self) -> ast.Target:
-    loc = self.location()
-    names = []
-    while self._lexer.token.type == Token.NAME:
-      names.append(self._lexer.token.value)
-      self._lexer.next()
-      if self._lexer.token.tv != (Token.CONTROL, '.'):
-        break
-      self._lexer.next()
-    if not names:
-      self.error(ast.Target, Token.NAME)
-    return ast.Target(loc, '.'.join(names))
-
-  def parse_assign(self, target: ast.Expr) -> ast.Assign:
-    if self._lexer.token.tv != (Token.CONTROL, '='):
-      self.error(ast.Assign, Token.CONTROL, '=')
-    self._lexer.next()
-    return ast.Assign(target.loc, target, self.parse_expr())
-
-  def parse_python(self, mode: PyParseMode = PyParseMode.DEFAULT) -> t.Tuple[t.List[pyast.stmt], t.List[ast.Lambda]]:
+  def parse_python(self, mode: PyParseMode = PyParseMode.DEFAULT) -> t.Tuple[t.Optional[pyast.stmt], t.List[ast.Lambda]]:
     """
     Consumes all tokens for a Python expression and parses them with the #ast module. The parsing
     mode can be overwritten to change the behaviour slightly as to how which or how many tokens
@@ -174,18 +155,21 @@ class Parser:
 
     loc = self.location()
     lambdas: t.List[ast.Lambda] = []
+    indent = self.parse_indent()
 
     with self._lexer.enabled(Token.WHITESPACE):
 
-      parts: t.List[str] = []
+      parts: t.List[str] = [' ' * indent]
       stack: t.List[str] = []
       is_atomic: t.List[bool] = [True]
       found_comma = [False]
 
-      while self._lexer.token.type != 'eof' and self._lexer.token.tv != (Token.CONTROL, '='):
+      while self._lexer.token.type != 'eof':
         token = self._lexer.token
         if token.tv == (Token.CONTROL, ';'):
           self._lexer.next()
+          break
+        if mode != PyParseMode.EXEC and self._lexer.token.tv == (Token.CONTROL, '='):
           break
 
         if not parts and mode == PyParseMode.CALL and token.tv != (Token.CONTROL, '('):
@@ -195,10 +179,6 @@ class Parser:
         node = self.try_parse_lambda()
         if node is not None:
           lambdas.append(node)
-          if parts:
-            # TODO(NiklasRosenstein): Maybe only need to do this when there exists code on
-            #     the same line already.
-            parts.append(' ')
           parts.append(node.id)
           continue
 
@@ -231,13 +211,13 @@ class Parser:
           stack.pop()
           is_atomic.pop()
           found_comma.pop()
-        elif mode != PyParseMode.EXEC and token.type == Token.NEWLINE:
-          if not stack:
-            break
+        elif token.tv == (Token.CONTROL, '=') and  mode == PyParseMode.EXEC:
+          pass
         elif mode == PyParseMode.ARGUMENT and token.tv == (Token.CONTROL, ',') and not stack:
           break
         elif mode == PyParseMode.CALL and not stack:
           break
+
         parts.append(token.value)
 
         # Only after a comma or after a semi-colon (in a dictionary, this check is too lax) can
@@ -253,25 +233,42 @@ class Parser:
         except TokenizationError:
           self.error(ast.Expr)
 
-    if not parts:
-      return [], []
+        if token.type == Token.NEWLINE and not stack:
+          checkpoint = self._lexer.checkpoint()
+          current_indent = self.parse_indent()
+          if current_indent <= indent:
+            self._lexer.restore(checkpoint)
+            break
+          parts.append(' ' * current_indent)
 
     # Adjust the code's line number and offset accordingly. This is really hacky.
     code = ''.join(parts)
-    requires_wrapper = mode == PyParseMode.EXEC and textwrap.dedent(code) != code
+    if not code.strip():
+      return None, []
+
+    requires_wrapper = (mode == PyParseMode.EXEC and textwrap.dedent(code) != code) or indent > 0
+    parse_mode = 'exec' if requires_wrapper or mode == PyParseMode.EXEC else 'eval'
     if requires_wrapper:
       code = '\n' * (loc.lineno - 1) + 'def body():\n' + code
     else:
       code = '\n' * (loc.lineno - 1) + code
-    parse_mode = 'exec' if mode == PyParseMode.EXEC else 'eval'
-    pyast_node = pyast.parse(code, mode=parse_mode, filename=self._filename)
 
+    pyast_node = pyast.parse(code, mode=parse_mode, filename=self._filename)
     if requires_wrapper:
       statements = t.cast(pyast.FunctionDef, t.cast(pyast.Module, pyast_node).body[0]).body
+      assert len(statements) == 1, statements
+      node = statements[0]
+      if mode != PyParseMode.EXEC:
+        assert isinstance(node, pyast.Expr)
+        node = pyast.Expression(body=node.value)
     else:
-      statements = [t.cast(pyast.Expr, pyast_node)]
+      node = pyast_node
 
-    return statements, lambdas
+    if isinstance(node, pyast.Module):
+      assert len(node.body) == 1
+      node = node.body[0]
+
+    return node, lambdas
 
   def parse_expr(self, mode: PyParseMode = PyParseMode.DEFAULT) -> ast.Expr:
     """
@@ -282,14 +279,12 @@ class Parser:
     if mode == PyParseMode.EXEC:
       raise ValueError(f'invalid mode for parse_expr(): {mode}')
 
-    stmts, lambdas = self.parse_python(mode)
-    if not stmts:
+    stmt, lambdas = self.parse_python(mode)
+    if not stmt:
       assert not lambdas
       raise NoExpression()
 
-    assert len(stmts) == 1
-    assert isinstance(stmts[0], pyast.Expression)
-    return ast.Expr(loc, lambdas, stmts[0])
+    return ast.Expr(loc, lambdas, stmt.body)
 
   def try_parse_lambda(self) -> t.Optional[ast.Lambda]:
     loc = self.location()
@@ -356,34 +351,45 @@ class Parser:
       self.error(ast.Expr, Token.CONTROL, '{')
     self._lexer.next()
 
-    lines: t.List[str] = []
-    stmts, lambdas = self.parse_python(PyParseMode.EXEC)
+    stmt, lambdas = self.parse_python(PyParseMode.EXEC)
     if self._lexer.token.tv != (Token.CONTROL, '}'):
       self.error(pyast.FunctionDef, Token.CONTROL, '}')
     self._lexer.next()
 
+    body = [x.fdef for x in lambdas] + [stmt] if stmt else [pyast.Pass()]
     return util.function_def(
       name,
       argument_names,
-      [x.fdef for x in lambdas] + stmts,  # type: ignore
+      body,
       lineno=loc.lineno,
       col_offset=loc.colno)
 
-  def parse_statement(self) -> t.Optional[ast.Node]:
+  def parse_statement(self) -> t.Iterable[ast.Node]:
     """
     Parses a statement from the current position of the lexer. If no statement can be parsed from
-    the current position, the method returns #None.
+    the current position, the method returns an empty generator.
     """
 
-    indent = self.parse_indent()
+    loc = self.location()
+    checkpoint = self._lexer.checkpoint()
+    self.parse_indent()
+
+    if self._lexer.token.type == Token.NAME and self._lexer.token.value in ('def', 'class', 'if', 'with', 'for', 'while'):
+      self._lexer.restore(checkpoint)
+      stmt, lambdas = self.parse_python(PyParseMode.EXEC)
+      yield ast.Stmt(loc, lambdas, stmt)
+      return
+
+    self._lexer.restore(checkpoint)
 
     try:
       expr = self.parse_expr()
     except NoExpression:
-      return None
+      return
 
     if self._lexer.token.type in ('eof', Token.NEWLINE):
-      return expr
+      yield expr
+      return
 
     is_closure = False
     lambdas: t.List[ast.Lambda] = []
@@ -403,27 +409,33 @@ class Parser:
       is_closure = True
       self._lexer.next()
       while self._lexer.token.tv != (Token.CONTROL, '}'):
-        node = self.parse_statement()
-        if not node:
+        nodes = list(self.parse_statement())
+        if not nodes:
           assert self._lexer.token.tv == (Token.CONTROL, '}')
           break
-        body.append(node)
+        body += nodes
       self._lexer.next()
 
+    if not is_closure and self._lexer.token.tv == (Token.CONTROL, '='):
+      self._lexer.restore(checkpoint)
+      stmt, lambdas = self.parse_python(PyParseMode.EXEC)
+      yield ast.Stmt(loc, lambdas, stmt)
+      return
+
     if not is_closure:
-      # TODO (@NiklasRosenstein): The expr here can be more than one target.
-      return self.parse_assign(expr)
+      assert not args and not lambdas and not args
+      yield expr
+      return
 
-    return ast.Closure(expr.loc, self._generate_unique_name('_closure_', expr.loc), expr, lambdas, args, body)
-
+    yield ast.Closure(expr.loc, self._generate_unique_name('_closure_', expr.loc), expr, lambdas, args, body)
 
   def parse(self) -> ast.Module:
     loc = self.location()
     nodes: t.List[ast.Node] = []
     while self._lexer.token:
-      node = self.parse_statement()
-      if not node:
+      current_nodes = list(self.parse_statement())
+      if not current_nodes:
         break
-      nodes.append(node)
+      nodes += current_nodes
     assert not self._lexer.scanner, f'did not parse till the end, got stuck at {self._lexer.scanner.cursor}'
     return ast.Module(loc, nodes)

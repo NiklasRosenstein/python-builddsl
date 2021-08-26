@@ -3,6 +3,8 @@ import abc
 import sys
 import typing as t
 
+import astor
+
 from .closure import Closure
 from .macros import MacroPlugin
 from .transpiler import compile_file
@@ -61,7 +63,10 @@ def run_file(
   def _inner(self):
     globals['self'] = self
     module = compile_file(filename, fp, macros)
-    code = compile(module, filename=filename, mode='exec')
+    try:
+      code = compile(module, filename=filename, mode='exec')
+    except TypeError as exc:
+      raise TypeError(str(exc) + '\n\n' + astor.dump_tree(module))
     exec(code, globals)
 
   globals['__runtime__'] = Runtime()

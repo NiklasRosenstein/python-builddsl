@@ -38,20 +38,22 @@ class Transpiler:
     for node in nodes:
       if isinstance(node, ast.Closure):
         yield from self.transpile_closure(node)
-      elif isinstance(node, ast.Assign):
-        yield from self.transpile_assign(node)
       elif isinstance(node, ast.Expr):
-        lambdas, expr = self.transpile_expr(node)
-        yield from lambdas
-        yield pyast.Expr(expr)
+        yield from (x.fdef for x in node.lambdas)
+        yield pyast.Expr(node.expr)
+      elif isinstance(node, ast.Lambda):
+        yield node.fdef
+      elif isinstance(node, ast.Stmt):
+        yield from (x.fdef for x in node.lambdas)
+        yield node.stmt
       else:
         raise RuntimeError(f'encountered unexpected node: {node!r}')
 
   def transpile_closure(self, node: ast.Closure) -> t.Iterator[pyast.stmt]:
     yield from (x.fdef for x in node.lambdas)
 
-    lambdas, target = self.transpile_expr(node.target)
-    yield from lambdas
+    yield from node.target.lambdas
+    target = node.target.expr
 
     if node.body:
       func_name = node.id
@@ -80,39 +82,6 @@ class Transpiler:
 
     else:
       yield pyast.Expr(target)
-
-  def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
-    yield from (x.fdef for x in node.target.lambdas)
-    yield from (x.fdef for x in node.value.lambdas)
-    stmts = util.compile_snippet(f'{astor.to_source(node.target.expr).rstrip()} = {astor.to_source(node.value.expr)}')
-    assert len(stmts) == 1
-    yield t.cast(pyast.stmt, stmts[0])
-
-  def transpile_target(self,
-    prefix: t.Optional[str],
-    node: ast.Target,
-    ctx: pyast.expr_context
-  ) -> pyast.expr:
-    """
-    Converts an #ast.Target node into an expression that identifies the target with the specified
-    context (load/store/del).
-    """
-
-    name = node.name
-    if prefix is not None:
-      name = prefix + '.' + name
-
-    if isinstance(ctx, pyast.Store) or prefix:
-      return util.name_expr(name, ctx)
-
-    parts = name.split('.')
-    code = parts[0]
-    if len(parts) > 1:
-      code += '.' + '.'.join(parts[1:])
-    return util.name_expr(code, ctx, lineno=node.loc.lineno, col_offset=node.loc.colno)
-
-  def transpile_expr(self, node: ast.Expr) -> t.Tuple[t.List[pyast.FunctionDef], pyast.expr]:
-    return [x.fdef for x in node.lambdas], node.expr.body
 
 
 def compile_file(
