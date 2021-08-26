@@ -53,7 +53,7 @@ Hello, World!
 Closures can define a parameter list and can also have a single expression as their body. Only closures without
 a parameter list will receive `self` as a default argument.
 
-<table><tr><th>Craftr DSL</th><th>Python</th></tr>
+<table align="center"><tr><th>Craftr DSL</th><th>Python</th></tr>
 
 <tr><td>
 
@@ -114,7 +114,7 @@ is basically the same as calling that object with the function, and arguments fo
 supported.
 
 
-<table><tr><th>Craftr DSL</th><th>Python</th></tr>
+<table align="center"><tr><th>Craftr DSL</th><th>Python</th></tr>
 
 <tr><td>
 
