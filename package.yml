@@ -5,7 +5,7 @@ modulename: craftr.dsl
 description: Parser and transpiler for the Craftr DSL.
 typed: true
 requirements:
-- python ^3.6
+- python ^3.8
 - astor ^0.8.1
 - nr.parsing.core ^2.0.2
 - nr.pylang.ast ~0.0.5

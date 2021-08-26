@@ -15,7 +15,7 @@ Latest from GitHub:
 
     $ pip install git+https://github.com/craftr-build/craftr-dsl
 
-Requirements: Python 3.6 or newer
+Requirements: Python 3.8 or newer
 
 ### Hello, World!
 
