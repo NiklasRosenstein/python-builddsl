@@ -47,11 +47,7 @@ setuptools.setup(
   tests_require = test_requirements,
   python_requires = '>=3.8.0,<4.0.0',
   data_files = [],
-  entry_points = {
-    'craftr.dsl.macros': [
-      'yaml = craftr.dsl.macros.yaml:YamlMacro',
-    ]
-  },
+  entry_points = {},
   cmdclass = {},
   keywords = [],
   classifiers = [],

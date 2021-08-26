@@ -12,9 +12,6 @@ requirements:
 - dataclasses ^0.6
 - nr.functional ^0.1.0
 - termcolor ^1.1.0
-entrypoints:
-  craftr.dsl.macros:
-  - yaml = craftr.dsl.macros.yaml:YamlMacro
 test-drivers:
 - type: mypy
 - type: pytest
