@@ -56,7 +56,7 @@ class Transpiler:
     if node.body:
       func_name = node.id
       body = list(self.transpile_nodes(node.body))
-      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.)')[0]).value
+      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.delegate)')[0]).value
       dec.args.append(target)
       yield util.function_def(
         func_name,

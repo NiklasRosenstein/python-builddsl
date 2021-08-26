@@ -35,11 +35,7 @@ def main():
   else:
     context = None
 
-  def _execute(self):
-    run_file(self, {}, args.file or '<stdin>', sys.stdin if not args.file else None, macros=macros)
-
-  closure = Closure(_execute, sys._getframe(), None, context)
-  closure()
+  run_file(context, {}, args.file or '<stdin>', sys.stdin if not args.file else None, macros=macros)
 
 
 if __name__ == '__main__':
