@@ -3,6 +3,8 @@ version: 0.1.2
 author: Niklas Rosenstein <rosensteinniklas@gmail.com>
 modulename: craftr.dsl
 description: Parser and transpiler for the craftr DSL.
+license: MIT
+url: https://github.com/craftr-build/craftr-dsl
 typed: true
 requirements:
 - python ^3.6
