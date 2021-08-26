@@ -8,6 +8,7 @@ import threading
 import typing as t
 from itertools import chain
 
+from .closure import Closure, ResolveStrategy
 from .macros import MacroPlugin
 from .transpiler import compile_file
 
@@ -57,18 +58,13 @@ class Runtime:
         stack.append(self._initial)
       return stack
 
-  def closure(self) -> t.Callable[[T_Callable], T_Callable]:
+  def closure(self, owner: t.Any, delegate: t.Any) -> t.Callable[[T_Callable], T_Callable]:
     """
-    Mark a function as being a closure. Effectively this just pushes the first argument of the
-    closure on the threadlocal stack for name resolution.
+    Decorator for closures.
     """
 
     def decorator(func):
-      @functools.wraps(func)
-      def wrapper(ctx, *args, **kwargs):
-        with self.pushing(ctx):
-          return func(ctx, *args, **kwargs)
-      return wrapper
+      return Closure(func, sys._getframe(1), owner, delegate, ResolveStrategy.DELEGATE_FIRST)
 
     return decorator
 

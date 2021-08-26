@@ -48,6 +48,9 @@ class LambdaRule(Rule):
     return self.func(scanner)
 
 
+class NoExpression(Exception): ...
+
+
 class Parser:
   """
   This parser constructs an AST from craftr DSL code.
@@ -125,6 +128,11 @@ class Parser:
     line = (self._code.splitlines() + [''])[cursor.lineno - 1]
     raise SyntaxError(message, (self._filename, cursor.lineno, cursor.colno, line))
 
+  def _generate_unique_name(self, prefix: str, loc: ast.Location) -> str:
+    filename = os.path.basename(self._filename)
+    filename = re.sub(r'[^A-z0-9\_]+', '_', filename).strip('_')
+    return f'{prefix}{filename}_{loc.lineno}_{loc.colno}'
+
   def parse_indent(self) -> int:
     indent = 0
     while True:  # Skip over empty lines with indents
@@ -182,7 +190,10 @@ class Parser:
 
       parts: t.List[str] = []
       stack: t.List[str] = []
-      while self._lexer.token.type != 'eof':
+      is_atomic: t.List[bool] = [True]
+      found_comma = [False]
+
+      while self._lexer.token.type != 'eof' and self._lexer.token.tv != (Token.CONTROL, '='):
         token = self._lexer.token
         if token.tv == (Token.CONTROL, ';'):
           self._lexer.next()
@@ -212,8 +223,16 @@ class Parser:
           parts.append(astor.to_source(self._macros[token.value].parse_macro(self, self._lexer)))
           continue
 
+        if token.tv == (Token.CONTROL, '{') and not is_atomic[-1]:
+          # TODO (@NiklasRosenstein): Parse closure here
+          if stack or found_comma[-1]:
+            self.error(ast.Expr, msg='closures nested inside expressions are not currently supported')
+          break
+
         if token.type == Token.CONTROL and token.value in '([{':
           stack.append({'(': ')', '[': ']', '{': '}'}[token.value])
+          is_atomic.append(True)
+          found_comma.append(False)
         elif token.type == Token.CONTROL and token.value in ')]}':
           if not stack:
             #self._lexer.next()
@@ -221,6 +240,8 @@ class Parser:
           if stack[-1] != token.value:
             self.error(ast.Expr, Token.CONTROL, stack[-1])  # Unbalanced parenthesis
           stack.pop()
+          is_atomic.pop()
+          found_comma.pop()
         elif mode != PyParseMode.EXEC and token.type == Token.NEWLINE:
           if not stack:
             break
@@ -229,10 +250,22 @@ class Parser:
         elif mode == PyParseMode.CALL and not stack:
           break
         parts.append(token.value)
+
+        # Only after a comma or after a semi-colon (in a dictionary, this check is too lax) can
+        # a full atomic expression begin.
+        if token.type != Token.WHITESPACE:
+          is_atomic[-1] = token.type == Token.CONTROL and token.value in (',', ':')
+
+        if token.tv == (Token.CONTROL, ','):
+          found_comma[-1] = True
+
         try:
           self._lexer.next()
         except TokenizationError:
           self.error(ast.Expr)
+
+    if not parts:
+      return [], []
 
     # Adjust the code's line number and offset accordingly. This is really hacky.
     code = ''.join(parts)
@@ -261,6 +294,10 @@ class Parser:
       raise ValueError(f'invalid mode for parse_expr(): {mode}')
 
     stmts, lambdas = self.parse_python(mode)
+    if not stmts:
+      assert not lambdas
+      raise NoExpression()
+
     assert len(stmts) == 1
     assert isinstance(stmts[0], pyast.Expression)
     return ast.Expr(loc, lambdas, stmts[0])
@@ -275,9 +312,7 @@ class Parser:
       return None
 
     # Generate a unique ID for the lambda.
-    filename = os.path.basename(self._filename)
-    filename = re.sub(r'[^A-z0-9\_]+', '_', filename).strip('_')
-    lambda_id = f'lambda_{filename}_{loc.lineno}_{loc.colno}'
+    lambda_id = self._generate_unique_name('_lambda_', loc)
 
     # Parse the lambda body and construct a function definition node from it.
     func_def = self.parse_lambda_body(loc, lambda_id, lambda_header)
@@ -357,39 +392,45 @@ class Parser:
       if self._lexer.token.value == 'let':
         return self.parse_let()
 
-      target = self.parse_target()
-      is_call = False
-      lambdas: t.List[ast.Lambda] = []
-      args: t.Optional[t.List[pyast.expr]] = None
-      body: t.List[ast.Node] = []
-
-      if self._lexer.token.tv == (Token.CONTROL, '('):
-        is_call = True
-        expr = self.parse_expr(PyParseMode.CALL)
-        if isinstance(expr.expr.body, pyast.Tuple):
-          args = expr.expr.body.elts
-        else:
-          args = [expr.expr.body]
-        lambdas += expr.lambdas
-
-      if self._lexer.token.tv == (Token.CONTROL, '{'):
-        is_call = True
-        self._lexer.next()
-        while self._lexer.token.tv != (Token.CONTROL, '}'):
-          node = self.parse_statement()
-          if not node:
-            assert self._lexer.token.tv == (Token.CONTROL, '}')
-            break
-          body.append(node)
-        self._lexer.next()
-
-      if not is_call:
-        return self.parse_assign(target)
-
-      return ast.Call(target.loc, target, lambdas, args, body)
-
-    else:
+    try:
+      expr = self.parse_expr()
+    except NoExpression:
       return None
+
+    if self._lexer.token.type in ('eof', Token.NEWLINE):
+      return expr
+
+    is_call = False
+    lambdas: t.List[ast.Lambda] = []
+    args: t.Optional[t.List[pyast.expr]] = None
+    body: t.List[ast.Node] = []
+
+    if self._lexer.token.tv == (Token.CONTROL, '('):
+      is_call = True
+      expr = self.parse_expr(PyParseMode.CALL)
+      if isinstance(expr.expr.body, pyast.Tuple):
+        args = expr.expr.body.elts
+      else:
+        args = [expr.expr.body]
+      lambdas += expr.lambdas
+
+    if self._lexer.token.tv == (Token.CONTROL, '{'):
+      is_call = True
+      self._lexer.next()
+      while self._lexer.token.tv != (Token.CONTROL, '}'):
+        node = self.parse_statement()
+        if not node:
+          assert self._lexer.token.tv == (Token.CONTROL, '}')
+          break
+        body.append(node)
+      self._lexer.next()
+
+    if not is_call:
+      # TODO (@NiklasRosenstein): The expr here can be more than one target.
+      return self.parse_assign(expr)
+
+    return ast.Call(expr.loc, self._generate_unique_name('_closure_', expr.loc), expr, lambdas, args, body)
+
 
   def parse(self) -> ast.Module:
     loc = self.location()
@@ -399,4 +440,5 @@ class Parser:
       if not node:
         break
       nodes.append(node)
+    assert not self._lexer.scanner, f'did not parse till the end, got stuck at {self._lexer.scanner.cursor}'
     return ast.Module(loc, nodes)

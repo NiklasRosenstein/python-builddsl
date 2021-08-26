@@ -24,9 +24,6 @@ class Transpiler:
   #: The name of the closure argument.
   closure_arg_name: str = 'self'
 
-  def _lookup_code(self, name: str) -> str:
-    return f'{self.runtime_object_name}.lookup({name!r})'
-
   def transfer_loc(self, loc: ast.Location, node: pyast.AST) -> None:
     node.lineno = loc.lineno
     node.col_offset = loc.colno
@@ -37,9 +34,9 @@ class Transpiler:
     pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
     # Rewrite variable references with lookups via the __runtime__.
-    pyast_module = rewrite_names(
-      pyast_module, self.runtime_object_name,
-      store=False, delete=False, scope_inheritance=False)
+    #pyast_module = rewrite_names(
+    #  pyast_module, self.runtime_object_name,
+    #  store=False, delete=False, scope_inheritance=False)
     return pyast_module
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
@@ -50,24 +47,30 @@ class Transpiler:
         yield from self.transpile_call(node)
       elif isinstance(node, ast.Assign):
         yield from self.transpile_assign(node)
+      elif isinstance(node, ast.Expr):
+        lambdas, expr = self.transpile_expr(node)
+        yield from lambdas
+        yield pyast.Expr(expr)
       else:
         raise RuntimeError(f'encountered unexpected node: {node!r}')
 
   def transpile_call(self, node: ast.Call) -> t.Iterator[pyast.stmt]:
+    yield from (x.fdef for x in node.lambdas)
+
+    lambdas, target = self.transpile_expr(node.target)
+    yield from lambdas
+
     if node.body:
-      func_name = '__configure_' + node.target.name.replace('.', '_')
+      func_name = node.id
       body = list(self.transpile_nodes(node.body))
-      dec = t.cast(pyast.Expr, util.compile_snippet('__runtime__.closure()')[0]).value
+      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.delegate)')[0]).value
+      dec.args.append(target)
       yield util.function_def(
         func_name,
         [self.closure_arg_name],
         body,
         decorator_list=[dec],
         lineno=node.loc.lineno, col_offset=node.loc.colno)
-
-    yield from [x.fdef for x in node.lambdas]
-
-    target = self.transpile_target(None, node.target, pyast.Load())
 
     # Generate a call expression for the selected method.
     if node.args is not None:
@@ -80,24 +83,13 @@ class Transpiler:
         col_offset=node.loc.colno)
 
     if node.body:
-      value_name = func_name + '_' + self.closure_arg_name + '_target'
-      yield pyast.Assign(targets=[util.name_expr(value_name, pyast.Store())], value=target)
-
-      # If the value appears to be a context manager, enter it's context before executing
-      # the body of the call.
-      yield from t.cast(t.List[pyast.stmt], util.compile_snippet(
-        f'with {self.runtime_object_name}.pushing(locals()):\n'
-        f'  __runtime__.configure_object({value_name}, {func_name})',
-        lineno=node.loc.lineno,
-        col_offset=node.loc.colno))
+      yield from util.compile_snippet(f'{node.id}()')
 
     else:
       yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
-    stmts = util.compile_snippet(
-      f'{self.runtime_object_name}.set_object_property('
-      f'    {self.closure_arg_name}, {node.target.name!r}, {astor.to_source(node.value.expr.body)})')
+    stmts = util.compile_snippet(f'{astor.to_source(node.target.expr).rstrip()} = {astor.to_source(node.value.expr)}')
     assert len(stmts) == 1
     yield t.cast(pyast.stmt, stmts[0])
 

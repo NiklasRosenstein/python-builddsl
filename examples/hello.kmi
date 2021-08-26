@@ -10,6 +10,6 @@ let closureRunner = (closure) => {
   closure('World!')
 }
 
-closureRunner {
+closureRunner {=
   print('Hello,', self)
 }

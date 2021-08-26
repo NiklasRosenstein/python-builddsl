@@ -4,9 +4,10 @@ import importlib
 import os
 import sys
 
-import astor  # type: ignore
+import astor
 
 from . import run_file, compile_file
+from .closure import Closure  # type: ignore
 from .macros import get_macro_plugin
 
 parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')
@@ -14,9 +15,6 @@ parser.add_argument('file', nargs='?')
 parser.add_argument('-c', '--context', metavar='ENTRYPOINT')
 parser.add_argument('-E', '--transpile', action='store_true')
 parser.add_argument('-m', '--macros', default=[], action='append')
-
-class VoidContext:
-  pass
 
 
 def main():
@@ -35,9 +33,13 @@ def main():
     module_name, member = args.context.partition(':')
     context = getattr(importlib.import_module(module_name), member)()
   else:
-    context = VoidContext()
+    context = None
 
-  run_file(context, {}, args.file or '<stdin>', sys.stdin if not args.file else None, macros=macros)
+  def _execute(self):
+    run_file(self, {}, args.file or '<stdin>', sys.stdin if not args.file else None, macros=macros)
+
+  closure = Closure(_execute, sys._getframe(), None, context)
+  closure()
 
 
 if __name__ == '__main__':

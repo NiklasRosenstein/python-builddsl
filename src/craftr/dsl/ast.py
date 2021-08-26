@@ -87,6 +87,8 @@ class Target(Node):
     return context
 
 
+# TODO (@NiklasRosenstein): Rename to Closure
+
 @dataclass
 class Call(Node):
   """
@@ -107,8 +109,11 @@ class Call(Node):
       }
   """
 
+  #: A unique ID for the call.
+  id: str
+
   #: The target of the block call expression.
-  target: Target
+  target: Expr
 
   #: Lambda definitions needed for the call.
   lambdas: t.List[Lambda]
@@ -129,7 +134,7 @@ class Assign(Node):
   """
 
   #: The target of the assignment.
-  target: Target
+  target: Expr
 
   #: THe value to assign.
   value: Expr

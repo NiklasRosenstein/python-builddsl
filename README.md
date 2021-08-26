@@ -25,8 +25,8 @@ name that is available in the closure's inner scope.
 ```py
 'Hello, World' {
   print(type(self).__name__)
-  print(type(self.__closure__.delegate).__name__)
-  print(self)
+  print(type(self()).__name__)
+  print(self())
   print(self.upper())
 }
 ```
@@ -34,7 +34,7 @@ name that is available in the closure's inner scope.
 </td><td>
 
 ```py
-let func = () => {
+let func = (name) => {
   print(f'Hello, {name}!')
 }
 
@@ -45,24 +45,25 @@ func('World')
 <tr><th>Python (generated)</th><td>
 
 ```py
-@__runtime__.closure('Hello, World')
-def _closure_main_craftr_1(self):
-  print(type(self).__name__)
-  print(type(self.__closure__.delegate).__name__)
-  print(self)
-  print(self.upper())
+@__runtime__.closure(self.__closure__.delegate, 'Hello, World')
+def _closure_main_craftr_1_0(self):
+    print(type(self).__name__)
+    print(type(self()).__name__)
+    print(self())
+    print(self.upper())
 
-_closure_main_craftr_1()
+
+_closure_main_craftr_1_0()
 ```
 
 </td><td>
 
 ```py
-def _lambda_main_craftr_1(name):
-  print(f'Hello, {name}!')
+def _lambda_main_craftr_1_11(name):
+    print(f'Hello, {name}!')
 
-func = _lambda_main_craftr_1
 
+func = _lambda_main_craftr_1_11
 func('World')
 ```
 
