@@ -1,4 +1,0 @@
-# type: ignore
-
-world = { self('World!') }
-world { print('Hello,', self) }
