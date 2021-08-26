@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8', '3.9', '3.x' ]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -24,8 +24,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: python -m pip install shut==0.17.4 -q
+      run: python -m pip install shut==0.18.0 -q
     - name: Test
       run: shut pkg test --isolate
-    - name: Verify package.yml
-      run: shut pkg update --verify
+    - name: Verify package
+      run: shut pkg checks

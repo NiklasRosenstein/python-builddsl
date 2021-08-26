@@ -7,9 +7,7 @@ import os
 import setuptools
 import sys
 
-command = sys.argv[1] if len(sys.argv) >= 2 else None
-
-readme_file = 'README.md'
+readme_file = 'readme.md'
 if os.path.isfile(readme_file):
   with io.open(readme_file, encoding='utf8') as fp:
     long_description = fp.read()
@@ -19,15 +17,14 @@ else:
 
 requirements = [
   'astor >=0.8.1,<1.0.0',
-  'nr.parsing.core >=1.1.0,<2.0.0',
+  'nr.parsing.core >=2.0.2,<3.0.0',
   'nr.pylang.ast >=0.0.5,<0.1.0',
   'dataclasses >=0.6.0,<1.0.0',
   'nr.functional >=0.1.0,<1.0.0',
+  'termcolor >=1.1.0,<2.0.0',
 ]
 test_requirements = [
-  'PyYAML',
-  'types-PyYAML',
-  'types-setuptools',
+  'types-termcolor',
 ]
 extras_require = {}
 extras_require['test'] = test_requirements
@@ -37,11 +34,11 @@ setuptools.setup(
   version = '0.1.2',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
-  description = 'Parser and transpiler for the craftr DSL.',
+  description = 'Parser and transpiler for the Craftr DSL.',
   long_description = long_description,
   long_description_content_type = 'text/markdown',
-  url = 'https://github.com/craftr-build/craftr-dsl',
-  license = 'MIT',
+  url = None,
+  license = None,
   packages = setuptools.find_packages('src', ['test', 'test.*', 'tests', 'tests.*', 'docs', 'docs.*']),
   package_dir = {'': 'src'},
   include_package_data = True,
