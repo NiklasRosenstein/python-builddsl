@@ -141,18 +141,5 @@ class Assign(Node):
 
 
 @dataclass
-class Let(Node):
-  """
-  Define variable, independent of the current context. On lookup, variable take precedence over
-  context members. The syntax is as follows:
-
-      <Let> ::= 'let' <Assign>
-  """
-
-  target: Target
-  value: Expr
-
-
-@dataclass
 class Module(Node):
   body: t.List[Node]

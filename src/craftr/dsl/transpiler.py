@@ -8,7 +8,6 @@ import typing as t
 from dataclasses import dataclass
 
 import astor  # type: ignore
-from nr.pylang.ast.dynamic_eval import rewrite_names  # type: ignore
 
 from . import ast, parser, util
 from .macros import MacroPlugin
@@ -33,17 +32,11 @@ class Transpiler:
     nodes: t.List[pyast.stmt] = list(self.transpile_nodes(module.body))
     pyast_module = util.module(nodes)
     pyast.fix_missing_locations(pyast_module)
-    # Rewrite variable references with lookups via the __runtime__.
-    #pyast_module = rewrite_names(
-    #  pyast_module, self.runtime_object_name,
-    #  store=False, delete=False, scope_inheritance=False)
     return pyast_module
 
   def transpile_nodes(self, nodes: t.Iterable[ast.Node]) -> t.Iterator[pyast.stmt]:
     for node in nodes:
-      if isinstance(node, ast.Let):
-        yield from self.transpile_let(node)
-      elif isinstance(node, ast.Call):
+      if isinstance(node, ast.Call):
         yield from self.transpile_call(node)
       elif isinstance(node, ast.Assign):
         yield from self.transpile_assign(node)
@@ -63,7 +56,7 @@ class Transpiler:
     if node.body:
       func_name = node.id
       body = list(self.transpile_nodes(node.body))
-      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.delegate)')[0]).value
+      dec = t.cast(pyast.Call, util.compile_snippet(f'{self.runtime_object_name}.closure(self.__closure__.)')[0]).value
       dec.args.append(target)
       yield util.function_def(
         func_name,
@@ -89,14 +82,11 @@ class Transpiler:
       yield pyast.Expr(target)
 
   def transpile_assign(self, node: ast.Assign) -> t.Iterator[pyast.stmt]:
+    yield from (x.fdef for x in node.target.lambdas)
+    yield from (x.fdef for x in node.value.lambdas)
     stmts = util.compile_snippet(f'{astor.to_source(node.target.expr).rstrip()} = {astor.to_source(node.value.expr)}')
     assert len(stmts) == 1
     yield t.cast(pyast.stmt, stmts[0])
-
-  def transpile_let(self, node: ast.Let) -> t.Iterator[pyast.stmt]:
-    target = self.transpile_target(None, node.target, pyast.Store())
-    yield from [x.fdef for x in node.value.lambdas]
-    yield pyast.Assign(targets=[target], value=node.value.expr.body)
 
   def transpile_target(self,
     prefix: t.Optional[str],

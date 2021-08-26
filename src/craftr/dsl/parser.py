@@ -165,17 +165,6 @@ class Parser:
     self._lexer.next()
     return ast.Assign(target.loc, target, self.parse_expr())
 
-  def parse_let(self) -> ast.Let:
-    assert self._lexer.token.tv == (Token.NAME, 'let')
-    loc = self.location()
-    self._lexer.next()
-    if self._lexer.token.type != Token.NAME:
-      self.error(ast.Let, Token.NAME)
-    name = self._lexer.token.value
-    self._lexer.next()
-    assign = self.parse_assign(ast.Target(loc, name))
-    return ast.Let(loc, assign.target, assign.value)
-
   def parse_python(self, mode: PyParseMode = PyParseMode.DEFAULT) -> t.Tuple[t.List[pyast.stmt], t.List[ast.Lambda]]:
     """
     Consumes all tokens for a Python expression and parses them with the #ast module. The parsing
@@ -387,10 +376,6 @@ class Parser:
     """
 
     indent = self.parse_indent()
-
-    if self._lexer.token.type == Token.NAME:
-      if self._lexer.token.value == 'let':
-        return self.parse_let()
 
     try:
       expr = self.parse_expr()

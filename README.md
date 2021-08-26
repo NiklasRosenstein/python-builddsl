@@ -34,7 +34,7 @@ name that is available in the closure's inner scope.
 </td><td>
 
 ```py
-let func = (name) => {
+func = (name) => {
   print(f'Hello, {name}!')
 }
 
@@ -59,11 +59,11 @@ _closure_main_craftr_1_0()
 </td><td>
 
 ```py
-def _lambda_main_craftr_1_11(name):
+def _lambda_main_craftr_1_7(name):
     print(f'Hello, {name}!')
 
 
-func = _lambda_main_craftr_1_11
+func = _lambda_main_craftr_1_7
 func('World')
 ```
 
