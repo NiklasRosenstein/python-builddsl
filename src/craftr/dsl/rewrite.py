@@ -11,7 +11,7 @@ from dataclasses import dataclass
 try:
   from termcolor import colored
 except ImportError:
-  def colored(s, *a, **kw) -> str: return str(s)
+  def colored(s, *a, **kw) -> str: return str(s)  # type: ignore
 
 from nr.parsing.core import rules
 from nr.parsing.core.scanner import Cursor
