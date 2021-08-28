@@ -22,6 +22,7 @@ requirements = [
   'nr.functional >=0.1.0,<1.0.0',
 ]
 test_requirements = [
+  'astor',
   'types-termcolor',
 ]
 extras_require = {}

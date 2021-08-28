@@ -21,4 +21,5 @@ test-drivers:
 - type: mypy
 - type: pytest
 test-requirements:
+- astor
 - types-termcolor
