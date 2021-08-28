@@ -6,7 +6,7 @@
   print(self.upper())
 }
 === EXPECTS ===
-def _closure_1(self):
+def _closure_1(self, *arguments, **kwarguments):
     print(type(self).__name__)
     print(type(self()).__name__)
     print(self())

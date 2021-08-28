@@ -1,0 +1,6 @@
+changes:
+- type: change
+  component: general
+  description: closures without arguments now have the default argument list `(self,
+    *argnames, **kwargnames)` instead of `(self)`
+  fixes: []

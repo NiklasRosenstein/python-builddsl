@@ -33,7 +33,7 @@ for i in range(3):
 
         class MyClass:
 
-            def _closure_1(self):
+            def _closure_1(self, *arguments, **kwarguments):
                 return 'MyClass instance'
             __repr__ = _closure_1
 
@@ -43,7 +43,7 @@ for i in range(3):
 
                 def say_hello(self) ->None:
 
-                    def _closure_2(self):
+                    def _closure_2(self, *arguments, **kwarguments):
                         print('Hello,', self)
 
                         def something_useful():

@@ -31,10 +31,10 @@ This is transpiled to
 
 ```py
 # $ python -m craftr.dsl hello.craftr -E | grep -v -e '^$'
-def _closure_1(self):
+def _closure_1(self, *arguments, **kwarguments):
     self('World!')
 world = _closure_1
-def _closure_2(self):
+def _closure_2(self, *arguments, **kwarguments):
     print('Hello,', self)
 world(_closure_2)
 ```
@@ -50,8 +50,8 @@ Hello, World!
 
 ### Closures
 
-Closures can define a parameter list and can also have a single expression as their body. Only closures without
-a parameter list will receive `self` as a default argument.
+Closures are formed with the following syntax: `[ arg -> | (arg1, arg2, ...) -> ] { body }`. A closure without
+an argument list automatically has the signature `(self, *argnames, **kwargnames)`.
 
 <table align="center"><tr><th>Craftr DSL</th><th>Python</th></tr>
 
@@ -63,7 +63,7 @@ filter({ self % 2 }, range(5))
 </td><td>
 
 ```py
-def _closure_1(self):
+def _closure_1(self, *argnames, **kwargnames):
     self % 2
 filter(_closure_1, range(5))
 ```

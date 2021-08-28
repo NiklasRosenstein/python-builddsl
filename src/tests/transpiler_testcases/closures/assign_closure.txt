@@ -28,9 +28,10 @@ def _closure_1(project):
         def configure(self, closure):
             closure.apply(self)
 
-            def _closure_1_closure_1(self):
+            def _closure_1_closure_1(self, *arguments, **kwarguments):
 
-                def _closure_1_closure_1_closure_1_closure_1(self):
+                def _closure_1_closure_1_closure_1_closure_1(self, *
+                    arguments, **kwarguments):
                     print(self.task_name, self.data_files)
                 do_last(_closure_1_closure_1_closure_1_closure_1)
             project.task(self.task_name)(_closure_1_closure_1)

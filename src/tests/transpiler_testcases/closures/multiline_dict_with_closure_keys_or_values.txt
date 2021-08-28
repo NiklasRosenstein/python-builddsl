@@ -8,7 +8,7 @@ def _closure_1():
     return 10
 
 
-def _closure_2(self):
+def _closure_2(self, *arguments, **kwarguments):
     print('Hello, World!')
 
 

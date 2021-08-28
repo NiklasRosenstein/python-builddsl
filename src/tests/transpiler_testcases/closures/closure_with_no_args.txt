@@ -9,7 +9,7 @@ def _closure_1():
 func_1 = _closure_1
 
 
-def _closure_2(self):
+def _closure_2(self, *arguments, **kwarguments):
     pass
 
 

@@ -34,9 +34,11 @@ class TranspileOptions:
   #: Pure python code to include before a closure definition, for example to decorate it.
   closure_def_prefix: str = ''  # '@__closure_decorator__(__closure__)\n'
 
-  #: The default argument list for closures without an explicit argument list. Defaults to `self, ` because
-  #: closures without an explicit argument list are expected to take at least one argument.
-  closure_default_arglist: str = 'self, '
+  #: The default argument list for closures without an explicit argument list. By default a
+  #: closure always accepts a "self" argument, but also any other arguments that are passed
+  #: to it. This is useful when using a arglist-less closure for a function that passed
+  #: multiple arguments, but the closure is only interested in the first.
+  closure_default_arglist: str = 'self, *arguments, **kwarguments'
 
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:
