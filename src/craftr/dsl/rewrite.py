@@ -7,7 +7,11 @@ import contextlib
 import enum
 import typing as t
 from dataclasses import dataclass
-from termcolor import colored
+
+try:
+  from termcolor import colored
+except ImportError:
+  def colored(s, *a, **kw) -> str: return str(s)
 
 from nr.parsing.core import rules
 from nr.parsing.core.scanner import Cursor
@@ -72,6 +76,8 @@ class ParseMode(enum.IntFlag):
 class SyntaxError(Exception):
   """
   Specialized Craftr DSL syntax error (the internal SyntaxError class is weird).
+
+  If the `termcolor` module is installed, the error message will be color coded.
   """
 
   message: str
@@ -122,7 +128,11 @@ class Closure:
 
 @dataclass
 class RewriteResult:
-  #: The rewritten Python code.
+  """
+  The result of rewriting Craftr DSL code to pure Python code.
+  """
+
+  #: The Craftr DSL code rewritten as Python code.
   code: str
 
   #: The closures extracted from the code.
@@ -130,6 +140,11 @@ class RewriteResult:
 
 
 class Rewriter:
+  """
+  This class rewrites Craftr DSL code to pure Python code. Closures are extracted from the code
+  and replaced with whitespace where appropriate to keep line and column numbers of the code in
+  tact as much as possible (not always fully accurate).
+  """
 
   UNARY_OPERATORS = frozenset(['not', '~'])
   BINARY_OPERATORS = frozenset(['-', '+', '*', '**', '/', '//', '^', '|', '&', '.', '==', '<=', '>=', '<', '>', 'is', '%'])
@@ -619,4 +634,9 @@ class Rewriter:
     return code
 
   def rewrite(self) -> RewriteResult:
+    """
+    Rewrite the code and return the #RewriteResult. This can be interpreted by the
+    #craftr.dsl.transpiler.ClosureRewriter to re-inject the code for closures.
+    """
+
     return RewriteResult(self._rewrite_stmt_block(), self._closures)

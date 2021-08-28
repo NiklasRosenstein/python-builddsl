@@ -8,12 +8,15 @@ license: MIT
 typed: true
 requirements:
 - python ^3.8
-- astor ^0.8.1
 - nr.parsing.core ^2.0.2
 - nr.pylang.ast ~0.0.5
 - dataclasses ^0.6
 - nr.functional ^0.1.0
-- termcolor ^1.1.0
+extra-requirements:
+  colors:
+  - termcolor ^1.1.0
+  source:
+  - astor ^0.8.1
 test-drivers:
 - type: mypy
 - type: pytest

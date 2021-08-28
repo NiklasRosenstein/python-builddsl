@@ -42,6 +42,10 @@ class TranspileOptions:
 
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:
+  """
+  Transpile the Craftr DSL *code* to a Python `ast.Module` that can be executed.
+  """
+
   options = options or TranspileOptions()
   rewrite = Rewriter(code, filename, supports_local_def=options.closure_target is not None).rewrite()
   module = ast.parse(rewrite.code, filename, mode='exec', type_comments=False)
@@ -52,6 +56,10 @@ def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOpti
 
 
 def transpile_to_source(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> str:
+  """
+  Transpile the Craftr DSL *code* to Python code. Requires the `astor` module to be installed.
+  """
+
   from astor import to_source  # type: ignore
   return to_source(transpile_to_ast(code, filename, options))
 

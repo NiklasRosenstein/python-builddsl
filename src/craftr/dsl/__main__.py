@@ -4,8 +4,6 @@ import importlib
 import os
 import sys
 
-import astor  # type: ignore
-
 from . import execute, transpile_to_source
 
 parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')

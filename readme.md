@@ -9,7 +9,7 @@ The Craftr DSL is a transpiler for the Python language that introduces the conce
 
 From Pip:
 
-    $ pip install craftr-dsl
+    $ pip install craftr-dsl[source,colors]
 
 Latest from GitHub:
 

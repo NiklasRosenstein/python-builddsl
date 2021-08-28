@@ -1,0 +1,5 @@
+changes:
+- type: change
+  component: general
+  description: '`astor` and `termcolor` are now optional dependencies'
+  fixes: []

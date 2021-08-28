@@ -1,0 +1,25 @@
+loaders:
+  - type: python
+    search_path: [ src ]
+processors:
+  - type: filter
+  - type: smart
+  - type: crossref
+renderer:
+  type: mkdocs
+  pages:
+    - title: Home
+      name: index
+      source: README.md
+    - title: API Documentation
+      children:
+        - title: craftr.dsl
+          contents: [ craftr.dsl, craftr.dsl.execute ]
+        - title: craftr.dsl.rewrite
+          contents: [ craftr.dsl.rewrite, craftr.dsl.rewrite.SyntaxError, craftr.dsl.rewrite.RewriteResult, craftr.dsl.rewrite.Rewriter* ]
+        - title: craftr.dsl.transpiler
+          contents: [ craftr.dsl.transpiler, craftr.dsl.transpiler.* ]
+  mkdocs_config:
+    site_name: My Project
+    theme: readthedocs
+    repo_url: https://github.com/Me/my-project
