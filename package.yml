@@ -1,5 +1,5 @@
 name: craftr-dsl
-version: 0.2.0
+version: 0.3.0
 author: Niklas Rosenstein <rosensteinniklas@gmail.com>
 modulename: craftr.dsl
 description: Parser and transpiler for the Craftr DSL.
