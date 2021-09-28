@@ -9,7 +9,7 @@
   
   
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>craftr.dsl.rewrite - My Project</title>
+  <title>craftr.dsl.runtime - My Project</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
   <link rel="stylesheet" href="../../css/theme.css" />
@@ -18,8 +18,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "craftr.dsl.rewrite";
-    var mkdocs_page_input_path = "api-documentation/craftr.dsl.rewrite.md";
+    var mkdocs_page_name = "craftr.dsl.runtime";
+    var mkdocs_page_input_path = "api-documentation/craftr.dsl.runtime.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -58,25 +58,21 @@
                 <ul class="current">
                     <li class="toctree-l1"><a class="reference internal" href="../craftr.dsl/">craftr.dsl</a>
                     </li>
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">craftr.dsl.rewrite</a>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.dsl.rewrite/">craftr.dsl.rewrite</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">craftr.dsl.runtime</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#grammar-objects">Grammar Objects</a>
+    <li class="toctree-l2"><a class="reference internal" href="#context-objects">Context Objects</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#syntaxerror-objects">SyntaxError Objects</a>
+    <li class="toctree-l2"><a class="reference internal" href="#defaultcontext-objects">DefaultContext Objects</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#rewriteresult-objects">RewriteResult Objects</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#rewriter-objects">Rewriter Objects</a>
+    <li class="toctree-l2"><a class="reference internal" href="#closure-objects">Closure Objects</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#__init__">__init__</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#rewrite">rewrite</a>
+    <li class="toctree-l3"><a class="reference internal" href="#run_code">run_code</a>
     </li>
         </ul>
     </li>
     </ul>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../craftr.dsl.runtime/">craftr.dsl.runtime</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../craftr.dsl.transpiler/">craftr.dsl.transpiler</a>
                     </li>
@@ -106,10 +102,10 @@
         
       
     
-    <li>craftr.dsl.rewrite</li>
+    <li>craftr.dsl.runtime</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/Me/my-project/edit/master/docs/api-documentation/craftr.dsl.rewrite.md"
+        <a href="https://github.com/Me/my-project/edit/master/docs/api-documentation/craftr.dsl.runtime.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -121,50 +117,31 @@
           <div role="main">
             <div class="section">
               
-                <p><a id="craftr.dsl.rewrite"></a></p>
-<h1 id="craftrdslrewrite">craftr.dsl.rewrite</h1>
-<p>Rewrite Craftr DSL code to pure Python code.</p>
-<p><a id="craftr.dsl.rewrite.Grammar"></a></p>
-<h2 id="grammar-objects">Grammar Objects</h2>
-<pre><code class="language-python">@dataclass
-class Grammar()
+                <p><a id="craftr.dsl.runtime"></a></p>
+<h1 id="craftrdslruntime">craftr.dsl.runtime</h1>
+<p>Helpers for added runtime capabilities of transpiled Craftr DSL code, specifically around variable
+name resolution when enabling <code>TranspileOptions.closure_target</code>.</p>
+<p><a id="craftr.dsl.runtime.Context"></a></p>
+<h2 id="context-objects">Context Objects</h2>
+<pre><code class="language-python">class Context(t.Protocol)
 </code></pre>
-<p>Grammar settings.</p>
-<p><a id="craftr.dsl.rewrite.SyntaxError"></a></p>
-<h2 id="syntaxerror-objects">SyntaxError Objects</h2>
-<pre><code class="language-python">@dataclass
-class SyntaxError(Exception)
+<p>Protocol for context providers. Context methods are expected to raise a <code>NameError</code> in case of
+a name resolution error.</p>
+<p><a id="craftr.dsl.runtime.DefaultContext"></a></p>
+<h2 id="defaultcontext-objects">DefaultContext Objects</h2>
+<pre><code class="language-python">class DefaultContext(Context)
 </code></pre>
-<p>Specialized Craftr DSL syntax error (the internal SyntaxError class is weird).</p>
-<p>If the <code>termcolor</code> module is installed, the error message will be color coded.</p>
-<p><a id="craftr.dsl.rewrite.RewriteResult"></a></p>
-<h2 id="rewriteresult-objects">RewriteResult Objects</h2>
-<pre><code class="language-python">@dataclass
-class RewriteResult()
+<p>Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
+raises a <code>NameError</code>. It prevents you from overwriting methods.</p>
+<p><a id="craftr.dsl.runtime.Closure"></a></p>
+<h2 id="closure-objects">Closure Objects</h2>
+<pre><code class="language-python">class Closure(Context)
 </code></pre>
-<p>The result of rewriting Craftr DSL code to pure Python code.</p>
-<p><a id="craftr.dsl.rewrite.Rewriter"></a></p>
-<h2 id="rewriter-objects">Rewriter Objects</h2>
-<pre><code class="language-python">class Rewriter()
+<p><a id="craftr.dsl.runtime.Closure.run_code"></a></p>
+<h4 id="run_code">run_code</h4>
+<pre><code class="language-python"> | run_code(code: str, filename: str = '&lt;string&gt;', options: t.Optional[TranspileOptions] = None, scope: t.Optional[t.Dict[str, t.Any]] = None) -&gt; None
 </code></pre>
-<p>This class rewrites Craftr DSL code to pure Python code. Closures are extracted from the code
-and replaced with whitespace where appropriate to keep line and column numbers of the code in
-tact as much as possible (not always fully accurate).</p>
-<p><a id="craftr.dsl.rewrite.Rewriter.__init__"></a></p>
-<h4 id="__init__">__init__</h4>
-<pre><code class="language-python"> | __init__(text: str, filename: str, grammar: t.Optional[Grammar] = None) -&gt; None
-</code></pre>
-<p><strong>Arguments</strong></p>
-<ul>
-<li><strong>text</strong>: The Craftr DSL code to parse and turn into an AST-like structure.</li>
-<li><strong>filename</strong>: The filename where the DSL code is from.</li>
-</ul>
-<p><a id="craftr.dsl.rewrite.Rewriter.rewrite"></a></p>
-<h4 id="rewrite">rewrite</h4>
-<pre><code class="language-python"> | rewrite() -&gt; RewriteResult
-</code></pre>
-<p>Rewrite the code and return the <a href="#craftr.dsl.rewrite.RewriteResult"><code>RewriteResult</code></a>. This can be interpreted by the
-<code>craftr.dsl.transpiler.ClosureRewriter</code> to re-inject the code for closures.</p>
+<p>Executes the given Craftr DSL <em>code</em> with the <a href="#craftr.dsl.runtime.Closure"><code>Closure</code></a> as it's entry <code>__closure__</code> object.</p>
               
             </div>
           </div>
@@ -172,10 +149,10 @@ tact as much as possible (not always fully accurate).</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../craftr.dsl.runtime/" class="btn btn-neutral float-right" title="craftr.dsl.runtime">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../craftr.dsl.transpiler/" class="btn btn-neutral float-right" title="craftr.dsl.transpiler">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../craftr.dsl/" class="btn btn-neutral" title="craftr.dsl"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../craftr.dsl.rewrite/" class="btn btn-neutral" title="craftr.dsl.rewrite"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -205,10 +182,10 @@ tact as much as possible (not always fully accurate).</p>
         </span>
     
     
-      <span><a href="../craftr.dsl/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../craftr.dsl.rewrite/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../craftr.dsl.runtime/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../craftr.dsl.transpiler/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
