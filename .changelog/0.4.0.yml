@@ -16,3 +16,4 @@ changes:
 - type: fix
   component: general
   description: fix creation of `ast.Subscript` node in `NameRewriter`
+release_date: '2021-09-28'
