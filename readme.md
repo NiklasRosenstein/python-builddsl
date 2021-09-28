@@ -230,10 +230,17 @@ from craftr.dsl.runtime import Closure
 class Project:
   def task(self, name: str, *, do: callable): ...
 
-module = transpile_to_ast(craftr_dsl_code, filename, Closure.get_options())
+code = ...
+filename = ...
+
+# Long form:
+module = transpile_to_ast(code, filename, Closure.get_options())
 code = compile(module, filename, 'exec')
 scope = {'__closure__': Closure(None, None, Project())}
 exec(code, scope)
+
+# Shorthand form:
+Closure(None, None, Project()).run_code(code, filename)
 ```
 
 The `Closure.get_options()` function returns `TranspileOptions` that instruct the transpiler
