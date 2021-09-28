@@ -142,14 +142,12 @@ and replaced with whitespace where appropriate to keep line and column numbers o
 tact as much as possible (not always fully accurate).</p>
 <p><a id="craftr.dsl.rewrite.Rewriter.__init__"></a></p>
 <h4 id="__init__">__init__</h4>
-<pre><code class="language-python"> | __init__(text: str, filename: str, supports_local_def: bool) -&gt; None
+<pre><code class="language-python"> | __init__(text: str, filename: str, grammar: t.Optional[Grammar] = None) -&gt; None
 </code></pre>
 <p><strong>Arguments</strong></p>
 <ul>
 <li><strong>text</strong>: The Craftr DSL code to parse and turn into an AST-like structure.</li>
 <li><strong>filename</strong>: The filename where the DSL code is from.</li>
-<li><strong>supports_local_def</strong>: Whether the <code>def varname = ...</code> syntax is allowed and understood. This is an important
-  syntax feature when enabling the <code>NameRewriter</code> with <code>TranspileOptions.closure_target</code>.</li>
 </ul>
 <p><a id="craftr.dsl.rewrite.Rewriter.rewrite"></a></p>
 <h4 id="rewrite">rewrite</h4>
