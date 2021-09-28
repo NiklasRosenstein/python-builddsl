@@ -29,7 +29,7 @@ extras_require = {}
 extras_require['colors'] = [
   'termcolor >=1.1.0,<2.0.0',
 ]
-extras_require['source'] = [
+extras_require['codegen'] = [
   'astor >=0.8.1,<1.0.0',
 ]
 extras_require['test'] = test_requirements

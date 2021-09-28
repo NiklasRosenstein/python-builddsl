@@ -2,8 +2,10 @@
 print 'Hello, world!' 'How are you today?' 42 file=sys.stdout
 print 'Hello, world!' 'How are you today?' 42 file: sys.stdout
 print list(range(start: 1 end: 10 step=2))
+print 'Hello, World!' 42 * 1 + 10 file: sys.stdout
 === EXPECTS ===
 print('Hello, world!' ,'How are you today?' ,42 ,file=sys.stdout)
 print('Hello, world!' ,'How are you today?' ,42 ,file= sys.stdout)
 print(list(range(start= 1 ,end= 10 ,step=2)))
+print('Hello, World!' ,42 * 1 + 10 ,file= sys.stdout)
 === END ===

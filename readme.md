@@ -1,15 +1,16 @@
 # craftr-dsl
 
-The Craftr DSL is a transpiler for the Python language that introduces the concept of **closures** an 
-**function calls without parentheses** into the language.
+The Craftr DSL is a transpiler for the Python language that introduces the concept of
+**closures**, **function calls without parentheses** and a few other syntactical sugar
+into the language. The language is a full superset of Python 3 code. The added syntax
+features should only be used where it makes the code more readable or where it is
+semantically more relevant.
 
-## Getting started
-
-### Installation 
+## Installation
 
 From Pip:
 
-    $ pip install craftr-dsl[source,colors]
+    $ pip install craftr-dsl[codegen,colors]
 
 Latest from GitHub:
 
@@ -17,7 +18,7 @@ Latest from GitHub:
 
 Requirements: Python 3.8 or newer
 
-### Hello, World!
+## Hello, World!
 
 A convoluted Hello, World! example in Craftr DSL might look like this:
 
@@ -139,9 +140,33 @@ map {
 </td><td>
 
 ```py
-def _closure_1(self):
+def _closure_1(self, *arguments, **kwarguments):
     print('Hello,', self)
 map(_closure_1, ['John', 'World'])
+```
+</td></tr>
+
+</table>
+
+
+### Unseparated arguments & colon keyword arguments
+
+The Craftr DSL allows passing arguments to function calls without separation by commas.
+Keyword arguments may be specified using colons (`:`) instead of equal signs (`=`).
+
+<table>
+
+<tr><th>Craftr DSL</th><th>Python</th></tr>
+
+<tr><td>
+
+```py
+print 'Hello, World!' 42 * 1 + 10 file: sys.stdout
+```
+</td><td>
+
+```py
+print('Hello, World!', 42 * 1 + 10, file=sys.stdout)
 ```
 </td></tr>
 
@@ -149,23 +174,39 @@ map(_closure_1, ['John', 'World'])
 <tr><td>
 
 ```py
-list(map {  # Not allowed inside an expression
-  print('Hello,', self)
-}, ['John', 'World'])
+task "hello_world" do: {
+  print("Hello, World!")
+}
 ```
 </td><td>
 
 ```py
-craftr.dsl.rewrite.SyntaxError: 
-  in <stdin> at line 1: expected ) but got TokenProxy(Token(type=<Token.Control: 8>, value='{', pos=Cursor(offset=9, line=1, column=9)))
-  |list(map {
-  |~~~~~~~~~^
+def _closure_1(self, *arguments, **kwarguments):
+    print('Hello, World!')
+task('hello_world', do=_closure_1)
 ```
 </td></tr>
 
 
-</table>
+<tr><td>
 
+```py
+list(map {
+  print('Hello,', self)
+}, ['John', 'World'])
+```
+
+> **Note**: Pitfall, this actually passes three arguments to `list()`.
+</td><td>
+
+```py
+def _closure_1(self, *arguments, **kwarguments):
+    print('Hello,', self)
+list(map, _closure_1, ['John', 'World'])
+```
+</td></tr>
+
+</table>
 
 
 ### Limitations
@@ -176,6 +217,8 @@ some limitations, namely:
 * Literal sets cannot be expressed due to the grammar conflict with parameter-less closures
 * Type annotations are not currently supported
 * The walrus operator is not currently supported
+* Function calls without parenthesis do not support passing `*args` as the first argument as that is
+  interpreted as a multiplication expression.
 
 ---
 

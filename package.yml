@@ -15,7 +15,7 @@ requirements:
 extra-requirements:
   colors:
   - termcolor ^1.1.0
-  source:
+  codegen:
   - astor ^0.8.1
 test-drivers:
 - type: mypy
