@@ -36,7 +36,7 @@ extras_require['test'] = test_requirements
 
 setuptools.setup(
   name = 'craftr-dsl',
-  version = '0.4.2',
+  version = '0.5.0',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
   description = 'Parser and transpiler for the Craftr DSL.',

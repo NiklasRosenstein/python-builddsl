@@ -4,7 +4,7 @@ This package implements the Craftr DSL laguage.
 """
 
 __author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
-__version__ = '0.4.2'
+__version__ = '0.5.0'
 
 import typing as t
 from .rewrite import SyntaxError
