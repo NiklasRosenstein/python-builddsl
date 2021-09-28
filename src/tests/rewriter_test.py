@@ -13,7 +13,7 @@ def test_parser(case_data: CaseData) -> None:
   print(case_data.expects)
   print('='*30)
 
-  rewriter = Rewriter(case_data.input, case_data.filename, supports_local_def=False)
+  rewriter = Rewriter(case_data.input, case_data.filename)
   if case_data.expects_syntax_error:
     with pytest.raises(SyntaxError) as excinfo:
       rewriter.rewrite()

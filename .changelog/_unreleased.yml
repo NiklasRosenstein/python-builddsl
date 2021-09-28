@@ -3,3 +3,8 @@ changes:
   component: general
   description: '`astor` and `termcolor` are now optional dependencies'
   fixes: []
+- type: feature
+  component: general
+  description: add `Grammar` class to configure `Rewriter` class, add support for
+    colon keyword arguments (enabled by default)
+  fixes: []

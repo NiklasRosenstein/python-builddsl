@@ -8,7 +8,7 @@ import logging
 import typing as t
 from contextlib import contextmanager
 from dataclasses import dataclass
-from .rewrite import Closure, Rewriter
+from .rewrite import Closure, Grammar, Rewriter
 
 
 @dataclass
@@ -47,7 +47,7 @@ def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOpti
   """
 
   options = options or TranspileOptions()
-  rewrite = Rewriter(code, filename, supports_local_def=options.closure_target is not None).rewrite()
+  rewrite = Rewriter(code, filename, Grammar(local_def=options.closure_target is not None)).rewrite()
   module = ast.parse(rewrite.code, filename, mode='exec', type_comments=False)
   module = ClosureRewriter(filename, options, rewrite.closures).visit(module)
   if options.closure_target:

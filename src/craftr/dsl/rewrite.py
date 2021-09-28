@@ -18,6 +18,23 @@ from nr.parsing.core.scanner import Cursor
 from nr.parsing.core.tokenizer import ProxyToken as _ProxyToken, RuleSet, Tokenizer
 
 
+@dataclass
+class Grammar:
+  """
+  Grammar settings.
+  """
+
+  #: Whether unparenthesized function calls are allowed.
+  unparen_calls: bool = True
+
+  #: Whether keyword arguments may be specified using colons (`:`) as well as equal signs (`=`).
+  colon_kwargs: bool = True
+
+  #: Whether the `def varname = ...` syntax is allowed and understood. This is an important
+  #: syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
+  local_def: bool = False
+
+
 class Token(enum.Enum):
   Eof = enum.auto()
   Indent = enum.auto()
@@ -150,18 +167,16 @@ class Rewriter:
   BINARY_OPERATORS = frozenset(['-', '+', '*', '**', '/', '//', '^', '|', '&', '.', '==', '<=', '>=', '<', '>', 'is', '%'])
   PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
 
-  def __init__(self, text: str, filename: str, supports_local_def: bool) -> None:
+  def __init__(self, text: str, filename: str, grammar: t.Optional[Grammar] = None) -> None:
     """
     # Arguments
     text: The Craftr DSL code to parse and turn into an AST-like structure.
     filename: The filename where the DSL code is from.
-    supports_local_def: Whether the `def varname = ...` syntax is allowed and understood. This is an important
-      syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
     """
 
     self.tokenizer = Tokenizer(rule_set, text)
     self.filename = filename
-    self.supports_local_def = supports_local_def
+    self.grammar = grammar or Grammar()
     self._closure_stack: t.List[str] = []  #: Used to construct nested closure names.
     self._closure_counter = 0  #: Used to assign a unique number to every closure.
     self._closures: t.Dict[str, Closure] = {}
@@ -392,7 +407,7 @@ class Rewriter:
       code += self._consume_whitespace(mode)
       code += self._rewrite_expr(mode=mode)
       code += self._consume_whitespace(mode)
-      if mode & ParseMode.CALL_ARGS and token.is_control('='):
+      if mode & ParseMode.CALL_ARGS and (token.is_control('=') or (self.grammar.colon_kwargs and token.is_control(':'))):
         code += '='
         token.next()
         # TODO(NiklasRosenstein): This may be problematic in unparenthesised calls?
@@ -543,7 +558,7 @@ class Rewriter:
       token.next()
       code += '=' + self._consume_whitespace(newlines=False) + self._rewrite_items(ParseMode.DEFAULT)
 
-    elif token and not token.is_ignorable(True) and not token.is_control(')]}:'):  # Unparenthesises functionc all
+    elif token and not token.is_ignorable(True) and not token.is_control(')]}:') and self.grammar.unparen_calls:
       if code[-1].isspace():
         code = code[:-1]
       # TODO(NiklasRosenstein): We may want to indicate here that we're parsing call arguments,
@@ -596,7 +611,7 @@ class Rewriter:
     code += token.value
     token.next()
 
-    if self.supports_local_def and token.tv == (Token.Name, 'def') and (defcode := self._test_local_def()):
+    if self.grammar.local_def and token.tv == (Token.Name, 'def') and (defcode := self._test_local_def()):
       return code + defcode
 
     if token.type == Token.Name and token.value in self.PYTHON_BLOCK_KEYWORDS:
