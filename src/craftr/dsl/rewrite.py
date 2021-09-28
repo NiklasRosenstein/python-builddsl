@@ -167,7 +167,7 @@ class Rewriter:
     self._closures: t.Dict[str, Closure] = {}
 
   @contextlib.contextmanager
-  def _playing_games(self) -> t.Iterator[t.Callable[[], None]]:
+  def _lookahead(self) -> t.Iterator[t.Callable[[], None]]:
     """
     Context manager to save the current tokenizer and closure state and restore it on exit. This is
     useful for lookaheads, like :meth:`_test_dict`. If the returned callable is called, the
@@ -465,7 +465,7 @@ class Rewriter:
     token = ProxyToken(self.tokenizer)
     assert token.is_control('{'), False
 
-    with self._playing_games():
+    with self._lookahead():
       token.next()
       self._consume_whitespace(True, False)
       try:
@@ -561,7 +561,7 @@ class Rewriter:
     token = ProxyToken(self.tokenizer)
     assert token.tv == (Token.Name, 'def'), token
 
-    with self._playing_games() as commit:
+    with self._lookahead() as commit:
       token.next()
       self._consume_whitespace(False)
       if token.type != Token.Name:
