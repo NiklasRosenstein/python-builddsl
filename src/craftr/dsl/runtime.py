@@ -148,6 +148,7 @@ class Closure(Context):
     module = compile(transpile_to_ast(code, filename, options), filename, 'exec')
     if scope is None:
       scope = {}
+    assert options.closure_target
     scope[options.closure_target] = self
     exec(module, scope)
 
