@@ -64,6 +64,41 @@ class DefaultContext(Context):
     delattr(self._target, key)
 
 
+class ChainContext(Context):
+  """
+  Chain multiple #Context implementations.
+  """
+
+  def __init__(self, *contexts: Context) -> None:
+    self._contexts = contexts
+
+  def __getitem__(self, key):
+    for ctx in self._contexts:
+      try:
+        return ctx[key]
+      except NameError:
+        pass
+    raise NameError(key)
+
+  def __setitem__(self, key, value):
+    for ctx in self._contexts:
+      try:
+        ctx[key] = value
+        return
+      except NameError:
+        pass
+    raise NameError(key)
+
+  def __delitem__(self, key):
+    for ctx in self._contexts:
+      try:
+        del ctx[key]
+        return
+      except NameError:
+        pass
+    raise NameError(key)
+
+
 class Closure(Context):
   r"""
   This class serves as a mapping to use for dynamic name lookup when transpiling Craftr DSL code to Python.
