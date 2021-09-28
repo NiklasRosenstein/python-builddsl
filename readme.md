@@ -217,8 +217,8 @@ list(map, _closure_1, ['John', 'World'])
 
 For some purposes and applications, dynamic name resolution may be desirable, for
 example when writing `self` in front of every name to access a property of the closure
-target object. For this, the Craftr DSL transpiler can generate code that looks up,
-sets and deletes keys using subscript syntax on a particular variable name.
+target object is too cumbersome. For this, the Craftr DSL transpiler can generate code that
+looks up, sets and deletes keys using subscript syntax on a particular variable name.
 
 Using the `craftr.dsl.runtime` package, you can configure the transpiler and runtime
 to use dynamic name resolution. Example usage:
