@@ -193,7 +193,7 @@ class NameRewriter(ast.NodeTransformer):
       return node
     return ast.Subscript(
       value=ast.Name(id=self.options.closure_target, ctx=ast.Load()),
-      slice=ast.Constant(value=node.id),
+      slice=ast.Index(value=ast.Constant(value=node.id)),
       ctx=node.ctx)
 
   def visit_Assign(self, assign: ast.Assign) -> ast.AST:
