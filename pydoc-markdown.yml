@@ -25,6 +25,6 @@ renderer:
         - title: craftr.dsl.transpiler
           contents: [ craftr.dsl.transpiler, craftr.dsl.transpiler.* ]
   mkdocs_config:
-    site_name: My Project
+    site_name: Craftr DSL
     theme: readthedocs
-    repo_url: https://github.com/Me/my-project
+    repo_url: https://github.com/craftr-build/craftr-dsl
