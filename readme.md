@@ -175,7 +175,7 @@ print('Hello, World!', 42 * 1 + 10, file=sys.stdout)
 
 ```py
 task "hello_world" do: {
-  print("Hello, World!")
+  print "Hello, World!"
 }
 ```
 </td><td>

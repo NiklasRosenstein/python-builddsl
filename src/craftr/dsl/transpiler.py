@@ -40,6 +40,11 @@ class TranspileOptions:
   #: multiple arguments, but the closure is only interested in the first.
   closure_default_arglist: str = 'self, *arguments, **kwarguments'
 
+  #: A prefix to the argument list of closures. This prefix is added even to closures without
+  #: explicit arglist (so the final arglist will be #closure_arglist_prefix followed by
+  #: #closure_default_arglist).
+  closure_arglist_prefix: str = ''  # '__closure__,'
+
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:
   """
@@ -92,6 +97,8 @@ class ClosureRewriter(ast.NodeTransformer):
       arglist = self.options.closure_default_arglist
     else:
       arglist = ', '.join(closure.parameters)
+    arglist = self.options.closure_arglist_prefix + arglist
+
     function_code = f'{self.options.closure_def_prefix}def {closure_id}({arglist}):\n'
     function_code = '\n' * (function_code.count('\n') + closure.line) + function_code
     if closure.expr:

@@ -13,3 +13,7 @@ changes:
   description: add ability to pass function arguments without comma separation (enabled
     by default)
   fixes: []
+- type: feature
+  component: general
+  description: add `craftr.dsl.runtime` module and `TranspileOptions.closure_arglist_prefix`
+  fixes: []
