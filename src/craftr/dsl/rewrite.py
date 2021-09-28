@@ -30,6 +30,9 @@ class Grammar:
   #: Whether keyword arguments may be specified using colons (`:`) as well as equal signs (`=`).
   colon_kwargs: bool = True
 
+  #: Accept function arguments with comma separation.
+  nocomma_args: bool = True
+
   #: Whether the `def varname = ...` syntax is allowed and understood. This is an important
   #: syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
   local_def: bool = False
@@ -80,13 +83,13 @@ class ParseMode(enum.IntFlag):
   DEFAULT = 0
 
   #: The currently parsed expression is grouped in parenthesis and may wrap over lines.
-  GROUPED = 1
+  GROUPED = 1 << 0
 
   #: The currently parsed expression is the outter parenthesis of a function call.
-  FUNCTION_CALL = (1 << 1)
+  FUNCTION_CALL = 1 << 1
 
   #: The currently parsed expression is an argument to a function call.
-  CALL_ARGS = (1 << 2)
+  CALL_ARGS = 1 << 2
 
 
 @dataclass
@@ -403,19 +406,33 @@ class Rewriter:
 
     token = ProxyToken(self.tokenizer)
     code = ''
+    upsert_comma = False
     while True:
       code += self._consume_whitespace(mode)
-      code += self._rewrite_expr(mode=mode)
+      with self._lookahead() as commit:
+        try:
+          code += self._rewrite_expr(mode=mode)
+        except SyntaxError:
+          break
+        commit()
       code += self._consume_whitespace(mode)
       if mode & ParseMode.CALL_ARGS and (token.is_control('=') or (self.grammar.colon_kwargs and token.is_control(':'))):
         code += '='
         token.next()
         # TODO(NiklasRosenstein): This may be problematic in unparenthesised calls?
         code += self._rewrite_expr(mode=mode)
-      if not token.is_control(','):
+      if token.is_control(','):
+        code += ','
+        token.next()
+        upsert_comma = False
+      elif mode & ParseMode.CALL_ARGS and self.grammar.nocomma_args:
+        code += ','
+        upsert_comma = True
+      else:
         break
-      code += ','
-      token.next()
+
+    if upsert_comma:
+      code = code.rstrip(',')
     return code
 
   def _rewrite_atom(self, mode: ParseMode = ParseMode.DEFAULT) -> str:

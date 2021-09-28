@@ -1,0 +1,9 @@
+=== TEST unparen_call_with_no_commas ===
+print 'Hello, world!' 'How are you today?' 42 file=sys.stdout
+print 'Hello, world!' 'How are you today?' 42 file: sys.stdout
+print list(range())
+=== EXPECTS ===
+print('Hello, world!' ,'How are you today?' ,42 ,file=sys.stdout)
+print('Hello, world!' ,'How are you today?' ,42 ,file= sys.stdout)
+print(list(range()))
+=== END ===

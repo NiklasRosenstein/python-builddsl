@@ -8,3 +8,8 @@ changes:
   description: add `Grammar` class to configure `Rewriter` class, add support for
     colon keyword arguments (enabled by default)
   fixes: []
+- type: feature
+  component: general
+  description: add ability to pass function arguments without comma separation (enabled
+    by default)
+  fixes: []
