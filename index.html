@@ -327,8 +327,8 @@ list(map, _closure_1, ['John', 'World'])
 <h3 id="dynamic-name-resolution-non-default">Dynamic name resolution <sup>(non-default)</sup></h3>
 <p>For some purposes and applications, dynamic name resolution may be desirable, for
 example when writing <code>self</code> in front of every name to access a property of the closure
-target object. For this, the Craftr DSL transpiler can generate code that looks up,
-sets and deletes keys using subscript syntax on a particular variable name.</p>
+target object is too cumbersome. For this, the Craftr DSL transpiler can generate code that
+looks up, sets and deletes keys using subscript syntax on a particular variable name.</p>
 <p>Using the <code>craftr.dsl.runtime</code> package, you can configure the transpiler and runtime
 to use dynamic name resolution. Example usage:</p>
 <pre><code class="language-py">from craftr.dsl.transpiler import transpile_to_ast
@@ -475,5 +475,5 @@ some limitations, namely:</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-09-28 09:57:11.832996+00:00
+Build Date UTC : 2021-09-28 10:57:17.472709+00:00
 -->
