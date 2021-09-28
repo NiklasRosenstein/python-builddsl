@@ -16,12 +16,13 @@ def test_parser(case_data: CaseData) -> None:
   rewriter = Rewriter(case_data.input, case_data.filename)
   if case_data.expects_syntax_error:
     with pytest.raises(SyntaxError) as excinfo:
-      rewriter.rewrite()
+      print(rewriter.rewrite().code)
+      print('='*30, 'REWRITE RESULT')
     print(excinfo.value.get_text_hint())
-    print('='*30)
+    print('='*30, 'ERROR')
     assert excinfo.value.get_text_hint() == case_data.expects
   else:
     result = rewriter.rewrite().code
     print(result)
-    print('='*30)
+    print('='*30, 'REWRITE RESULT')
     assert result == case_data.expects
