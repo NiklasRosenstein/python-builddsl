@@ -60,7 +60,7 @@ class Closure:
     #   raise RuntimeError(f'lost reference to closure frame')
     # return frame
 
-  def child(self, func: t.Callable[..., t.Any], frame: t.Optional[types.FrameType] = None) -> None:
+  def child(self, func: t.Callable, frame: t.Optional[types.FrameType] = None) -> t.Callable:
 
     if frame is None:
       frame = sys._getframe(1)
