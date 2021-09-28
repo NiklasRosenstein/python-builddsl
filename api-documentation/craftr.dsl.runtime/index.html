@@ -66,6 +66,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#defaultcontext-objects">DefaultContext Objects</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#chaincontext-objects">ChainContext Objects</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#closure-objects">Closure Objects</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#run_code">run_code</a>
@@ -133,6 +135,11 @@ a name resolution error.</p>
 </code></pre>
 <p>Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
 raises a <code>NameError</code>. It prevents you from overwriting methods.</p>
+<p><a id="craftr.dsl.runtime.ChainContext"></a></p>
+<h2 id="chaincontext-objects">ChainContext Objects</h2>
+<pre><code class="language-python">class ChainContext(Context)
+</code></pre>
+<p>Chain multiple <a href="#craftr.dsl.runtime.Context"><code>Context</code></a> implementations.</p>
 <p><a id="craftr.dsl.runtime.Closure"></a></p>
 <h2 id="closure-objects">Closure Objects</h2>
 <pre><code class="language-python">class Closure(Context)
