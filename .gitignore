@@ -3,10 +3,11 @@
 *.egg
 build/
 .build/
+.conda*/
 .craftr/
+.venv*/
 .vscode/
 .mypy_cache/
 .pytest_cache/
-.venv*/
 /test.py
 changelog.md
