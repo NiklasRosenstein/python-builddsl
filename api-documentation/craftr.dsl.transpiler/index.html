@@ -76,6 +76,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#closure_default_arglist">closure_default_arglist</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#closure_arglist_prefix">closure_arglist_prefix</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#transpile_to_ast">transpile_to_ast</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#transpile_to_source">transpile_to_source</a>
@@ -163,6 +165,11 @@ prefixed with <code>def</code> are prefixed with the given string.</p>
 closure always accepts a "self" argument, but also any other arguments that are passed
 to it. This is useful when using a arglist-less closure for a function that passed
 multiple arguments, but the closure is only interested in the first.</p>
+<p><a id="craftr.dsl.transpiler.TranspileOptions.closure_arglist_prefix"></a></p>
+<h4 id="closure_arglist_prefix">closure_arglist_prefix</h4>
+<p>A prefix to the argument list of closures. This prefix is added even to closures without
+explicit arglist (so the final arglist will be <a href="#craftr.dsl.transpiler.TranspileOptions.closure_arglist_prefix"><code>closure_arglist_prefix</code></a> followed by
+<a href="#craftr.dsl.transpiler.TranspileOptions.closure_default_arglist"><code>closure_default_arglist</code></a>).</p>
 <p><a id="craftr.dsl.transpiler.transpile_to_ast"></a></p>
 <h4 id="transpile_to_ast">transpile_to_ast</h4>
 <pre><code class="language-python">transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -&gt; ast.Module
