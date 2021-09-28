@@ -49,19 +49,17 @@
                 <ul class="current">
                     <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting started</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a>
+    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#hello-world">Hello, World!</a>
-    </li>
-        </ul>
+    <li class="toctree-l2"><a class="reference internal" href="#hello-world">Hello, World!</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#language-features">Language features</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#closures">Closures</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#function-calls-without-parentheses">Function calls without parentheses</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#unseparated-arguments-colon-keyword-arguments">Unseparated arguments &amp; colon keyword arguments</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#limitations">Limitations</a>
     </li>
@@ -120,18 +118,20 @@
             <div class="section">
               
                 <h1 id="craftr-dsl">craftr-dsl</h1>
-<p>The Craftr DSL is a transpiler for the Python language that introduces the concept of <strong>closures</strong> an 
-<strong>function calls without parentheses</strong> into the language.</p>
-<h2 id="getting-started">Getting started</h2>
-<h3 id="installation">Installation</h3>
+<p>The Craftr DSL is a transpiler for the Python language that introduces the concept of
+<strong>closures</strong>, <strong>function calls without parentheses</strong> and a few other syntactical sugar
+into the language. The language is a full superset of Python 3 code. The added syntax
+features should only be used where it makes the code more readable or where it is
+semantically more relevant.</p>
+<h2 id="installation">Installation</h2>
 <p>From Pip:</p>
-<pre><code>$ pip install craftr-dsl[source,colors]
+<pre><code>$ pip install craftr-dsl[codegen,colors]
 </code></pre>
 <p>Latest from GitHub:</p>
 <pre><code>$ pip install git+https://github.com/craftr-build/craftr-dsl
 </code></pre>
 <p>Requirements: Python 3.8 or newer</p>
-<h3 id="hello-world">Hello, World!</h3>
+<h2 id="hello-world">Hello, World!</h2>
 <p>A convoluted Hello, World! example in Craftr DSL might look like this:</p>
 <pre><code class="language-py"># hello.craftr
 world = { self('World!') }
@@ -245,9 +245,32 @@ supported.</p>
 </td><td>
 
 
-<pre><code class="language-py">def _closure_1(self):
+<pre><code class="language-py">def _closure_1(self, *arguments, **kwarguments):
     print('Hello,', self)
 map(_closure_1, ['John', 'World'])
+</code></pre>
+
+</td></tr>
+
+</table>
+
+<h3 id="unseparated-arguments-colon-keyword-arguments">Unseparated arguments &amp; colon keyword arguments</h3>
+<p>The Craftr DSL allows passing arguments to function calls without separation by commas.
+Keyword arguments may be specified using colons (<code>:</code>) instead of equal signs (<code>=</code>).</p>
+<table>
+
+<tr><th>Craftr DSL</th><th>Python</th></tr>
+
+<tr><td>
+
+
+<pre><code class="language-py">print 'Hello, World!' 42 * 1 + 10 file: sys.stdout
+</code></pre>
+
+</td><td>
+
+
+<pre><code class="language-py">print('Hello, World!', 42 * 1 + 10, file=sys.stdout)
 </code></pre>
 
 </td></tr>
@@ -256,22 +279,41 @@ map(_closure_1, ['John', 'World'])
 <tr><td>
 
 
-<pre><code class="language-py">list(map {  # Not allowed inside an expression
-  print('Hello,', self)
-}, ['John', 'World'])
+<pre><code class="language-py">task &quot;hello_world&quot; do: {
+  print(&quot;Hello, World!&quot;)
+}
 </code></pre>
 
 </td><td>
 
 
-<pre><code class="language-py">craftr.dsl.rewrite.SyntaxError: 
-  in &lt;stdin&gt; at line 1: expected ) but got TokenProxy(Token(type=&lt;Token.Control: 8&gt;, value='{', pos=Cursor(offset=9, line=1, column=9)))
-  |list(map {
-  |~~~~~~~~~^
+<pre><code class="language-py">def _closure_1(self, *arguments, **kwarguments):
+    print('Hello, World!')
+task('hello_world', do=_closure_1)
 </code></pre>
 
 </td></tr>
 
+
+<tr><td>
+
+
+<pre><code class="language-py">list(map {
+  print('Hello,', self)
+}, ['John', 'World'])
+</code></pre>
+
+
+> **Note**: Pitfall, this actually passes three arguments to `list()`.
+</td><td>
+
+
+<pre><code class="language-py">def _closure_1(self, *arguments, **kwarguments):
+    print('Hello,', self)
+list(map, _closure_1, ['John', 'World'])
+</code></pre>
+
+</td></tr>
 
 </table>
 
@@ -282,6 +324,8 @@ some limitations, namely:</p>
 <li>Literal sets cannot be expressed due to the grammar conflict with parameter-less closures</li>
 <li>Type annotations are not currently supported</li>
 <li>The walrus operator is not currently supported</li>
+<li>Function calls without parenthesis do not support passing <code>*args</code> as the first argument as that is
+  interpreted as a multiplication expression.</li>
 </ul>
 <hr />
 <p align="center">Copyright &copy; 2021 Niklas Rosenstein</p>
@@ -343,5 +387,5 @@ some limitations, namely:</p>
 
 <!--
 MkDocs version : 1.2.2
-Build Date UTC : 2021-09-28 06:39:32.208415+00:00
+Build Date UTC : 2021-09-28 06:54:57.765038+00:00
 -->
