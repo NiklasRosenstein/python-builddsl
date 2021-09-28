@@ -11,7 +11,7 @@ import types
 import typing as t
 # import weakref
 
-from craftr.dsl.transpiler import TranspileOptions
+from craftr.dsl.transpiler import TranspileOptions, transpile_to_ast
 
 undefined = object()
 
@@ -129,6 +129,27 @@ class Closure(Context):
       return func(__closure__, *args, **kwargs)
 
     return _wrapper
+
+  def run_code(
+    self,
+    code: str,
+    filename: str = '<string>',
+    options: t.Optional[TranspileOptions] = None,
+    scope: t.Optional[t.Dict[str, t.Any]] = None,
+  ) -> None:
+    """
+    Executes the given Craftr DSL *code* with the #Closure as it's entry `__closure__` object.
+    """
+
+    if options:
+      Closure.init_options(options)
+    else:
+      options = Closure.get_options()
+    module = compile(transpile_to_ast(code, filename, options), filename, 'exec')
+    if scope is None:
+      scope = {}
+    scope[options.closure_target] = self
+    exec(module, scope)
 
   def __getitem__(self, key: str) -> t.Any:
     frame = self.frame

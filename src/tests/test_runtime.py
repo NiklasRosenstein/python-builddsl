@@ -1,6 +1,7 @@
 
 from types import SimpleNamespace
-from craftr.dsl.transpiler import transpile_to_ast, transpile_to_source
+import pytest
+from craftr.dsl.transpiler import transpile_to_source
 from craftr.dsl.runtime import Closure
 
 code = """
@@ -32,12 +33,10 @@ class Project:
 
 
 def test_closure():
-  print(transpile_to_source(code, '<stdin>', Closure.get_options()))
+  print(transpile_to_source(code, '<string>', Closure.get_options()))
 
-  module = compile(transpile_to_ast(code, '<stdin>', Closure.get_options()), '<stdin>', 'exec')
   project = Project()
-  scope = {'__closure__': Closure(None, None, project)}
-  exec(module, scope)
+  Closure(None, None, project).run_code(code)
 
   assert 'foobar' in project.tasks, project.tasks.keys()
   assert project.tasks['foobar'](SimpleNamespace(n_times=3)) == 3
@@ -50,3 +49,9 @@ def test_closure():
   assert 'cheeky' in project.tasks, project.tasks.keys()
   assert project.tasks['cheeky'](SimpleNamespace(n_times=3)) == 1
   assert project.tasks['cheeky'](SimpleNamespace()) == 1
+
+
+def test_closure_bad_delete():
+  with pytest.raises(NameError) as excinfo:
+    Closure(None, None, None).run_code('del foobar', '<string>')
+  assert str(excinfo.value) == "unclear where to delete 'foobar'"
