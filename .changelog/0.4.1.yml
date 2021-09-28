@@ -5,3 +5,4 @@ changes:
 - type: feature
   component: general
   description: add `Closure.run_code()` method
+release_date: '2021-09-28'
