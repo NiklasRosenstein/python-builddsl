@@ -1,0 +1,4 @@
+changes:
+- type: fix
+  component: general
+  description: add `Closure.__setitem__()` and `Closure.__delitem__()`

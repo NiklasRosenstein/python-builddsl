@@ -16,7 +16,55 @@ from craftr.dsl.transpiler import TranspileOptions
 undefined = object()
 
 
-class Closure:
+class Context(t.Protocol):
+  """
+  Protocol for context providers. Context methods are expected to raise a #NameError in case of
+  a name resolution error.
+  """
+
+  def __getitem__(self, key: str) -> t.Any: ...
+
+  def __setitem__(self, key: str, value: t.Any) -> None: ...
+
+  def __delitem__(self, key: str) -> None: ...
+
+
+class DefaultContext(Context):
+  """
+  Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
+  raises a #NameError. It prevents you from overwriting methods.
+  """
+
+  def __init__(self, target: t.Any) -> None:
+    self._target = target
+
+  def _error(self, key: str) -> NameError:
+    raise NameError(f'object of type {type(self._target).__name__} does not have an attribute {key!r}')
+
+  def __getitem__(self, key: str) -> t.Any:
+    value = getattr(self._target, key, undefined)
+    if value is not undefined:
+      return value
+    raise self._error(key)
+
+  def __setitem__(self, key: str, value: t.Any) -> None:
+    current = getattr(self._target, key, undefined)
+    if current is undefined:
+      raise self._error(key)
+    if isinstance(current, types.MethodType):
+      raise RuntimeError(f'cannot override method {type(self._target).__name__}.{key}()')
+    setattr(self._target, key, value)
+
+  def __delitem__(self, key: str) -> None:
+    current = getattr(self._target, key, undefined)
+    if current is undefined:
+      raise self._error(key)
+    if isinstance(current, types.MethodType):
+      raise RuntimeError(f'cannot delete method {type(self._target).__name__}.{key}()')
+    delattr(self._target, key)
+
+
+class Closure(Context):
   r"""
   This class serves as a mapping to use for dynamic name lookup when transpiling Craftr DSL code to Python.
   Several options in the #TranspileOptions need to be tweaked for this to work correctly as the closure
@@ -45,10 +93,18 @@ class Closure:
     Closure.init_options(options)
     return options
 
-  def __init__(self, parent: t.Optional['Closure'], frame: t.Optional[types.FrameType], target: t.Any) -> None:
+  def __init__(
+    self,
+    parent: t.Optional['Closure'],
+    frame: t.Optional[types.FrameType],
+    target: t.Any,
+    context_factory: t.Callable[[t.Any], Context] = DefaultContext,
+  ) -> None:
     self._parent = parent
     self._frame = frame  # weakref.ref(frame) if frame else None
     self._target = target
+    self._target_context = context_factory(target) if target is not None else None
+    self._context_factory = context_factory
 
   @property
   def frame(self) -> t.Optional[types.FrameType]:
@@ -64,12 +120,12 @@ class Closure:
 
     if frame is None:
       frame = sys._getframe(1)
-    closure = Closure(self, frame, None)
+    closure = Closure(self, frame, None, self._context_factory)
     del frame
 
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
-      __closure__ = Closure(self, closure.frame, args[0]) if args else closure
+      __closure__ = Closure(self, closure.frame, args[0], self._context_factory) if args else closure
       return func(__closure__, *args, **kwargs)
 
     return _wrapper
@@ -78,10 +134,11 @@ class Closure:
     frame = self.frame
     if frame and key in frame.f_locals:
       return frame.f_locals[key]
-    if self._target is not None:
-      value = getattr(self._target, key, undefined)
-      if value is not undefined:
-        return value
+    if self._target_context is not None:
+      try:
+        return self._target_context[key]
+      except NameError:
+        pass
     if self._parent is not None:
       try:
         return self._parent[key]
@@ -90,3 +147,39 @@ class Closure:
     if hasattr(builtins, key):
       return getattr(builtins, key)
     raise NameError(key)
+
+  def __setitem__(self, key: str, value: t.Any) -> None:
+    frame = self.frame
+    if frame and key in frame.f_locals:
+      raise RuntimeError(f'cannot set local variable through context, this should be handled by the transpiler')
+    if self._target_context is not None:
+      try:
+        self._target_context[key] = value
+        return
+      except NameError:
+        pass
+    if self._parent is not None:
+      try:
+        self._parent[key] = value
+        return
+      except NameError:
+        pass
+    raise NameError(f'unclear where to set {key!r}')
+
+  def __delitem__(self, key: str) -> None:
+    frame = self.frame
+    if frame and key in frame.f_locals:
+      raise RuntimeError(f'cannot delete local variable through context, this should be handled by the transpiler')
+    if self._target_context is not None:
+      try:
+        del self._target_context[key]
+        return
+      except NameError:
+        pass
+    if self._parent is not None:
+      try:
+        del self._parent[key]
+        return
+      except NameError:
+        pass
+    raise NameError(f'unclear where to delete {key!r}')
