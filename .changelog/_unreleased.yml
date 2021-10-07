@@ -1,0 +1,7 @@
+changes:
+- type: change
+  component: general
+  description: rename `DefaultContext` to `ObjectContext`
+- type: change
+  component: general
+  description: add `MapContext`

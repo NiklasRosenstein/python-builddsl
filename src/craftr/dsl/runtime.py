@@ -29,7 +29,7 @@ class Context(t.Protocol):
   def __delitem__(self, key: str) -> None: ...
 
 
-class DefaultContext(Context):
+class ObjectContext(Context):
   """
   Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
   raises a #NameError. It prevents you from overwriting methods.
@@ -62,6 +62,36 @@ class DefaultContext(Context):
     if isinstance(current, types.MethodType):
       raise RuntimeError(f'cannot delete method {type(self._target).__name__}.{key}()')
     delattr(self._target, key)
+
+
+class MapContext(Context):
+  """
+  Similar to #ObjectContext, but acts on a mapping instead.
+  """
+
+  def __init__(self, target: t.MutableMapping, description: str) -> None:
+    self._target = target
+    self._description = description
+
+  def _error(self, key: str) -> NameError:
+    raise NameError(f'{self._description} does not have an attribute {key!r}')
+
+  def __getitem__(self, key: str) -> t.Any:
+    if key in self._target:
+      return self._target[key]
+    raise self._error(key)
+
+  def __setitem__(self, key: str, value: t.Any) -> None:
+    if key in self._target:
+      self._target[key] = value
+    else:
+      raise self._error(key)
+
+  def __delitem__(self, key: str) -> None:
+    if key in self._target:
+      del self._target[key]
+    else:
+      raise self._error(key)
 
 
 class ChainContext(Context):
@@ -133,7 +163,7 @@ class Closure(Context):
     parent: t.Optional['Closure'],
     frame: t.Optional[types.FrameType],
     target: t.Any,
-    context_factory: t.Callable[[t.Any], Context] = DefaultContext,
+    context_factory: t.Callable[[t.Any], Context] = ObjectContext,
   ) -> None:
     self._parent = parent
     self._frame = frame  # weakref.ref(frame) if frame else None
