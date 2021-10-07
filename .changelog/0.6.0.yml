@@ -5,3 +5,4 @@ changes:
 - type: change
   component: general
   description: add `MapContext`
+release_date: '2021-10-07'
