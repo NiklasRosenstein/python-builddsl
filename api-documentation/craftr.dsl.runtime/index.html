@@ -64,7 +64,9 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#context-objects">Context Objects</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#defaultcontext-objects">DefaultContext Objects</a>
+    <li class="toctree-l2"><a class="reference internal" href="#objectcontext-objects">ObjectContext Objects</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mapcontext-objects">MapContext Objects</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#chaincontext-objects">ChainContext Objects</a>
     </li>
@@ -129,12 +131,17 @@ name resolution when enabling <code>TranspileOptions.closure_target</code>.</p>
 </code></pre>
 <p>Protocol for context providers. Context methods are expected to raise a <code>NameError</code> in case of
 a name resolution error.</p>
-<p><a id="craftr.dsl.runtime.DefaultContext"></a></p>
-<h2 id="defaultcontext-objects">DefaultContext Objects</h2>
-<pre><code class="language-python">class DefaultContext(Context)
+<p><a id="craftr.dsl.runtime.ObjectContext"></a></p>
+<h2 id="objectcontext-objects">ObjectContext Objects</h2>
+<pre><code class="language-python">class ObjectContext(Context)
 </code></pre>
 <p>Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
 raises a <code>NameError</code>. It prevents you from overwriting methods.</p>
+<p><a id="craftr.dsl.runtime.MapContext"></a></p>
+<h2 id="mapcontext-objects">MapContext Objects</h2>
+<pre><code class="language-python">class MapContext(Context)
+</code></pre>
+<p>Similar to <a href="#craftr.dsl.runtime.ObjectContext"><code>ObjectContext</code></a>, but acts on a mapping instead.</p>
 <p><a id="craftr.dsl.runtime.ChainContext"></a></p>
 <h2 id="chaincontext-objects">ChainContext Objects</h2>
 <pre><code class="language-python">class ChainContext(Context)
