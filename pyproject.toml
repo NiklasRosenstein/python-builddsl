@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "craftr-dsl"
-version = "0.1.0"
+version = "0.7.0"
 description = "Domain specific language for the Craftr build system."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
