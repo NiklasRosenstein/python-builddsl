@@ -4,6 +4,7 @@ version = "0.7.0"
 description = "Domain specific language for the Craftr build system."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
+readme = "readme.md"
 packages = [
   { include = "craftr/dsl", from="src" }
 ]
@@ -15,10 +16,6 @@ astor = "^0.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
-
-[tool.flit.metadata]
-module = "craftr.dsl"
-author = ""
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
