@@ -6,7 +6,7 @@ import ast
 import logging
 import typing as t
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from ._rewriter import Closure, Grammar, Rewriter
 
