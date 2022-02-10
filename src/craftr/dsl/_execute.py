@@ -1,3 +1,4 @@
+from lib2to3.pgen2.grammar import Grammar
 import typing as t
 
 from ._transpiler import TranspileOptions, transpile_to_ast

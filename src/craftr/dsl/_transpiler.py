@@ -6,7 +6,7 @@ import ast
 import logging
 import typing as t
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ._rewriter import Closure, Grammar, Rewriter
 
@@ -25,8 +25,8 @@ class TranspileOptions:
   pure_builtins: t.Collection[str] = frozenset()  # frozenset(['__closure_decorator__'])
 
   #: This is only used if #closure_target is specified and the #NameRewriter kicks in. Variable declarations
-  #: prefixed with `def` are prefixed with the given string.
-  local_vardef_prefix: str = '_def_'
+  #: prefixed with `def` are prefixed with the given string. Defaults to prefix supplied in the #grammar.
+  local_vardef_prefix: str = t.cast(t.Any, None)
 
   #: A preamble of pure Python code to include at the top of the module.
   preamble: str = ''  # 'from craftr.core.closure import closure as __closure_decorator__\n'
@@ -45,6 +45,14 @@ class TranspileOptions:
   #: #closure_default_arglist).
   closure_arglist_prefix: str = ''  # '__closure__,'
 
+  grammar: Grammar = t.cast(t.Any, None)
+
+  def __post_init__(self) -> None:
+    if self.grammar is None:
+      self.grammar = Grammar(local_def=self.closure_target is not None)
+    if self.local_vardef_prefix is None:
+      self.local_vardef_prefix = self.grammar.local_prefix
+
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:
   """
@@ -52,7 +60,7 @@ def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOpti
   """
 
   options = options or TranspileOptions()
-  rewrite = Rewriter(code, filename, Grammar(local_def=options.closure_target is not None)).rewrite()
+  rewrite = Rewriter(code, filename, options.grammar).rewrite()
   module = ast.parse(rewrite.code, filename, mode='exec', type_comments=False)
   module = ClosureRewriter(filename, options, rewrite.closures).visit(module)
   if options.closure_target:

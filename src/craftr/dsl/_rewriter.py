@@ -37,9 +37,16 @@ class Grammar:
   #: Accept function arguments with comma separation.
   nocomma_args: bool = True
 
-  #: Whether the `def varname = ...` syntax is allowed and understood. This is an important
+  #: Whether the `local varname = ...` syntax is allowed and understood. This is an important
   #: syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
   local_def: bool = False
+
+  #: The keyword for local definitions.
+  local_keyword: str = 'local'
+
+  #: The prefix for variable names that are localized. This is picked up by the transpiler.
+  local_prefix: str = '_local_'
+
 
 
 class Token(enum.Enum):
@@ -625,14 +632,14 @@ class Rewriter:
     """
 
     token = ProxyToken(self.tokenizer)
-    assert token.tv == (Token.Name, 'def'), token
+    assert token.tv == (Token.Name, self.grammar.local_keyword), token
 
     with self._lookahead() as commit:
       token.next()
       self._consume_whitespace(False)
       if token.type != Token.Name:
         return None
-      code = '_def_' + token.value
+      code = self.grammar.local_prefix + token.value
       token.next()
       code += self._consume_whitespace(False)
       if not token.is_control('='):
@@ -662,7 +669,7 @@ class Rewriter:
     code += token.value
     token.next()
 
-    if self.grammar.local_def and token.tv == (Token.Name, 'def') and (defcode := self._test_local_def()):
+    if self.grammar.local_def and token.tv == (Token.Name, self.grammar.local_keyword) and (defcode := self._test_local_def()):
       return code + defcode
 
     if token.type == Token.Name and token.value in self.PYTHON_BLOCK_KEYWORDS:
