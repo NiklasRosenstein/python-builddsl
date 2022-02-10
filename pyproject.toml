@@ -13,9 +13,42 @@ packages = [
 python = "^3.10"
 "nr.util" = "^0.4.0"
 astor = "^0.8.1"
+termcolor = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
+pydoc-markdown = "^4.5.0"
+
+[[tool.pydoc-markdown.loaders]]
+type = "python"
+search_path = [ "src" ]
+packages = [ "craftr.dsl" ]
+
+[tool.pydoc-markdown.renderer]
+type = "mkdocs"
+pages = [
+  {
+    title = "craftr-dsl",
+    name = "index",
+    source = "readme.md"
+  },
+  {
+    title = "API",
+    contents = [
+      "craftr.dsl._execute.execute",
+      "craftr.dsl._rewriter.Grammar",
+      "craftr.dsl._rewriter.SyntaxError",
+      "craftr.dsl._runtime.ChainContext",
+      "craftr.dsl._runtime.Closure",
+      "craftr.dsl._runtime.Context",
+      "craftr.dsl._runtime.MapContext",
+      "craftr.dsl._runtime.ObjectContext",
+      "craftr.dsl._transpiler.TranspileOptions",
+      "craftr.dsl._transpiler.transpile_to_ast",
+      "craftr.dsl._transpiler.transpile_to_source",
+    ]
+  }
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
