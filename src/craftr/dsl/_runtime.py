@@ -161,6 +161,7 @@ class Closure(Context):
   def get_options() -> TranspileOptions:
     options = TranspileOptions()
     Closure.init_options(options)
+    options.sync()
     return options
 
   def __init__(

@@ -6,7 +6,7 @@ import ast
 import logging
 import typing as t
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ._rewriter import Closure, Grammar, Rewriter
 
@@ -26,7 +26,7 @@ class TranspileOptions:
 
   #: This is only used if #closure_target is specified and the #NameRewriter kicks in. Variable declarations
   #: prefixed with `def` are prefixed with the given string. Defaults to prefix supplied in the #grammar.
-  local_vardef_prefix: str = t.cast(t.Any, None)
+  local_vardef_prefix: str = '_def_'
 
   #: A preamble of pure Python code to include at the top of the module.
   preamble: str = ''  # 'from craftr.core.closure import closure as __closure_decorator__\n'
@@ -45,13 +45,15 @@ class TranspileOptions:
   #: #closure_default_arglist).
   closure_arglist_prefix: str = ''  # '__closure__,'
 
-  grammar: Grammar = t.cast(t.Any, None)
+  grammar: Grammar = field(default_factory=Grammar)
 
-  def __post_init__(self) -> None:
-    if self.grammar is None:
-      self.grammar = Grammar(local_def=self.closure_target is not None)
-    if self.local_vardef_prefix is None:
-      self.local_vardef_prefix = self.grammar.local_prefix
+  def sync(self) -> None:
+    """ Synchronize the options to the #Grammar settings, i.e. the #Grammar.local_def setting
+    will be enabled or disabled depending on whether #closure_target is set and the
+    #local_vardef_prefix is used to set #Grammar.local_prefix. """
+
+    self.grammar.local_def = self.closure_target is not None
+    self.grammar.local_prefix = self.local_vardef_prefix
 
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:

@@ -37,16 +37,15 @@ class Grammar:
   #: Accept function arguments with comma separation.
   nocomma_args: bool = True
 
-  #: Whether the `local varname = ...` syntax is allowed and understood. This is an important
+  #: Whether the `def varname = ...` syntax is allowed and understood. This is an important
   #: syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
   local_def: bool = False
 
   #: The keyword for local definitions.
-  local_keyword: str = 'local'
+  local_keyword: str = 'def'
 
   #: The prefix for variable names that are localized. This is picked up by the transpiler.
-  local_prefix: str = '_local_'
-
+  local_prefix: str = '_def_'
 
 
 class Token(enum.Enum):
