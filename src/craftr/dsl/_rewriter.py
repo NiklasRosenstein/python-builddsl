@@ -18,6 +18,7 @@ except ImportError:
   def colored(s, *a, **kw) -> str:  # type: ignore
     return str(s)
 
+from ._util import debug_trace
 
 logger = logging.getLogger(__name__)
 
@@ -227,6 +228,7 @@ class Rewriter:
     text = self.tokenizer.scanner.getline(pos)
     return SyntaxError(msg, self.filename, pos.line, pos.column, text)
 
+  @debug_trace
   def _consume_whitespace(self, newlines: t.Union[bool, ParseMode] = False, reset_to_indent: bool = True) -> str:
     """
     Consumes whitespace, indents, comments, and, if enabled, newlines until a different token is
@@ -249,6 +251,7 @@ class Rewriter:
       parts.pop()
     return ''.join(parts)
 
+  @debug_trace
   def _parse_closure(self) -> t.Optional[Closure]:
     """
     Attempts to parse a closure at the current position of the tokenizer. Closures can have the
@@ -300,6 +303,7 @@ class Rewriter:
     self._closure_counter += 1
     return Closure(closure_id, pos.line, pos.column, arglist, body, expr)
 
+  @debug_trace
   def _parse_closure_body(self) -> t.Optional[str]:
     """
     Parses the body of a closure and returns it's code. Expects the tokenizer to point to the
@@ -323,6 +327,7 @@ class Rewriter:
     token.next()
     return code
 
+  @debug_trace
   def _parse_closure_header(self) -> t.Optional[t.List[str]]:
     """
     Handles the possible formats for a closure header, f.e. a single argument name or an arglist
@@ -351,6 +356,7 @@ class Rewriter:
       token.next()
       return arglist
 
+  @debug_trace
   def _parse_closure_arglist(self) -> t.Optional[t.List[str]]:
     """
     This method expects an open parenthesis as the current token and attempts to extract a list of
@@ -386,6 +392,7 @@ class Rewriter:
       token.next()
       return arglist
 
+  @debug_trace
   def _rewrite_expr(self, mode: ParseMode) -> str:
     """
     Consumes a Python expression and returns it's code. Does not parse over a comma.
@@ -416,18 +423,50 @@ class Rewriter:
 
     return code
 
+  @debug_trace
+  def _find_current_line_indent(self) -> int:
+    with self._lookahead():
+      self.tokenizer.scanner.pos = Cursor(
+        self.tokenizer.scanner.pos.offset - self.tokenizer.scanner.colno,
+        self.tokenizer.scanner.pos.line,
+        0
+      )
+      token = self.tokenizer.next()
+      assert token.type == Token.Indent
+      return len(token.value)
+
+  @debug_trace
+  def _check_next_indent(self, min_indent: int) -> int | None:
+    with self._lookahead():
+      token = ProxyToken(self.tokenizer)
+      assert token.type in (Token.Newline, Token.Indent), token
+      whitespace = self._consume_whitespace(True, False).splitlines()
+      indent = len(whitespace[-1])
+      if indent < min_indent:
+        return None
+      return indent
+
+  @debug_trace
   def _rewrite_items(self, mode: ParseMode) -> str:
     """
     Rewrites expressions separated by commas.
     """
 
+    line_indent = self._find_current_line_indent()
+    continuation_indent: int | None = None
+
     token = ProxyToken(self.tokenizer)
     code = ''
     upsert_comma = False
+    upgraded_to_call_args = False
+    do_break = False
+
     while True:
       code += self._consume_whitespace(mode)
-      if token.type == Token.Newline and not mode & ParseMode.GROUPED:
+
+      if token.type == Token.Newline and not (mode & ParseMode.GROUPED):
         break
+
       with self._lookahead() as commit:
         try:
           code += self._rewrite_expr(mode=mode)
@@ -435,27 +474,56 @@ class Rewriter:
           logger.debug('syntax error consumed while trying to parse expression', exc_info=sys.exc_info())
           break
         commit()
+
       code += self._consume_whitespace(mode)
+
       if mode & ParseMode.CALL_ARGS and (token.is_control('=') or
                                          (self.grammar.colon_kwargs and token.is_control(':'))):
         code += '='
         token.next()
         # TODO(NiklasRosenstein): This may be problematic in unparenthesised calls?
         code += self._rewrite_expr(mode=mode)
+
       if token.is_control(','):
         code += ','
         token.next()
         upsert_comma = False
+
       elif mode & ParseMode.CALL_ARGS and self.grammar.nocomma_args:
         code += ','
         upsert_comma = True
+
       else:
+        do_break = True
+
+      if token.type == Token.Newline:
+        if mode & ParseMode.GROUPED:
+          pass
+
+        elif continuation_indent is None:
+          continuation_indent = self._check_next_indent(line_indent + 1)
+          if continuation_indent is None:
+            break
+          if mode == ParseMode.DEFAULT and self.grammar.unparen_calls:
+            mode = ParseMode.CALL_ARGS
+            code += '('
+            upgraded_to_call_args = True
+
+        elif self._check_next_indent(continuation_indent) is None:
+          break
+        code += self._consume_whitespace(True)
+        continue
+
+      if do_break:
         break
 
     if upsert_comma:
       code = code.rstrip(',')
+    if upgraded_to_call_args:
+      code += ')'
     return code
 
+  @debug_trace
   def _rewrite_atom(self, mode: ParseMode = ParseMode.DEFAULT) -> str:
     """
     Consumes a Python or Craftr DSL language atom and returns it rewritten as pure Python code. If
@@ -510,6 +578,7 @@ class Rewriter:
 
     return code
 
+  @debug_trace
   def _test_dict(self) -> bool:
     """
     Tests if the code from the current opening curly brace looks like a dictionary definition.
@@ -529,6 +598,7 @@ class Rewriter:
       except SyntaxError:
         return False
 
+  @debug_trace
   def _rewrite_dict(self) -> str:
     token = ProxyToken(self.tokenizer)
     assert token.is_control('{'), token
@@ -558,6 +628,7 @@ class Rewriter:
     token.next()
     return code + '}'
 
+  @debug_trace
   def _rewrite_stmt_singleline(self) -> str:
     token = ProxyToken(self.tokenizer)
     code = self._consume_whitespace(False)
@@ -588,6 +659,7 @@ class Rewriter:
     else:
       return code + self._rewrite_stmt_line_expr_or_assign()
 
+  @debug_trace
   def _rewrite_stmt_line_expr_or_assign(self) -> str:
     token = ProxyToken(self.tokenizer)
     code = self._rewrite_items(ParseMode.DEFAULT)
@@ -624,6 +696,7 @@ class Rewriter:
 
     return code + self._consume_whitespace(True)
 
+  @debug_trace
   def _test_local_def(self) -> t.Optional[str]:
     """
     Tests if the current `def` keyword introduces a local variable assignment, and if so,
@@ -649,6 +722,7 @@ class Rewriter:
       commit()
       return code
 
+  @debug_trace
   def _rewrite_stmt(self, indentation: int) -> str:
     """
     Parses a line statement of Python code. Returns an empty string if the actual indendation of
@@ -691,6 +765,7 @@ class Rewriter:
     else:
       return code + self._rewrite_stmt_singleline()
 
+  @debug_trace
   def _rewrite_stmt_block(self, parent_indentation: t.Optional[int] = None) -> str:
     """
     Rewrites an entire statement block and returns it's rewritten code.
@@ -708,6 +783,7 @@ class Rewriter:
       code += stmt + self._consume_whitespace(True)
     return code
 
+  @debug_trace
   def rewrite(self) -> RewriteResult:
     """
     Rewrite the code and return the #RewriteResult. This can be interpreted by the

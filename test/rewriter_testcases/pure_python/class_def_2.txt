@@ -1,0 +1,11 @@
+=== TEST class_def_2 ===
+class Test:
+  def __call__(self, closure):
+    closure(self)
+  foo = 1
+=== EXPECTS ===
+class Test:
+  def __call__(self, closure):
+    closure(self)
+  foo = 1
+=== END ===

@@ -1,0 +1,15 @@
+=== TEST unparen_call_multiline ===
+option
+  "site_directory"
+  description: "The directory in which to generate the final HTML."
+  default: "_site"
+option "foo"
+  decription: "bar"
+=== EXPECTS ===
+option(
+  "site_directory",
+  description= "The directory in which to generate the final HTML.",
+  default= "_site")
+option("foo",
+  decription= "bar")
+=== END ===
