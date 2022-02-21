@@ -426,11 +426,7 @@ class Rewriter:
   @debug_trace
   def _find_current_line_indent(self) -> int:
     with self._lookahead():
-      self.tokenizer.scanner.pos = Cursor(
-        self.tokenizer.scanner.pos.offset - self.tokenizer.scanner.colno,
-        self.tokenizer.scanner.pos.line,
-        0
-      )
+      self.tokenizer.scanner.pos = self.tokenizer.scanner.pos.get_line_begin()
       token = self.tokenizer.next()
       assert token.type == Token.Indent
       return len(token.value)

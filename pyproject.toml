@@ -15,7 +15,7 @@ packages = [
 
   [tool.poetry.dependencies]
   python = "^3.10"
-  "nr.util" = ">=0.4.0,<1.0.0"
+  "nr.util" = ">=0.7.0,<1.0.0"
   astor = "^0.8.1"
   termcolor = "^1.1.0"
 
