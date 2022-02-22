@@ -13,6 +13,10 @@ packages = [
   { include = "craftr/dsl", from="src" }
 ]
 
+  [tool.poetry.urls]
+  Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
+  Documentation = "https://craftr-build.github.io/craftr-dsl/"
+
   [tool.poetry.dependencies]
   python = "^3.10"
   "nr.util" = ">=0.7.0,<1.0.0"
@@ -25,10 +29,12 @@ packages = [
   types-termcolor = "*"
 
 [tool.slam]
+typed = true
 
   [tool.slam.test]
   pytest = "pytest test/"
   mypy = "mypy src/ --namespace-packages"
+  check = "slam check"
 
 [tool.pydoc-markdown]
 
