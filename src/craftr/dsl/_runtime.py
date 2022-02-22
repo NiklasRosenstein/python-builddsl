@@ -172,20 +172,17 @@ class Closure(Context):
       context_factory: t.Callable[[t.Any], Context] = ObjectContext,
   ) -> None:
     self._parent = parent
-    self._frame = frame  # weakref.ref(frame) if frame else None
+    self._frame = frame  # weakref.ref(frame) if frame else None  # NOTE (@NiklasRosenstein): Cannot create weakref to frame
     self._target = target
     self._target_context = context_factory(target) if target is not None else None
     self._context_factory = context_factory
 
+  def __repr__(self) -> str:
+    return f'Closure(target={self._target!r})'
+
   @property
   def frame(self) -> t.Optional[types.FrameType]:
     return self._frame
-    # if self._frame is None:
-    #   return None
-    # frame = self._frame()
-    # if frame is None:
-    #   raise RuntimeError(f'lost reference to closure frame')
-    # return frame
 
   def child(self, func: t.Callable, frame: t.Optional[types.FrameType] = None) -> t.Callable:
 
@@ -239,7 +236,7 @@ class Closure(Context):
         pass
     if hasattr(builtins, key):
       return getattr(builtins, key)
-    raise NameError(key)
+    raise NameError(f'{key!r} in {self!r}')
 
   def __setitem__(self, key: str, value: t.Any) -> None:
     frame = self.frame
