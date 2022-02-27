@@ -2,6 +2,8 @@
 Rewrite Craftr DSL code to pure Python code.
 """
 
+from __future__ import annotations
+
 import contextlib
 import enum
 import logging
