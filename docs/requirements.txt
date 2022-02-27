@@ -1,0 +1,5 @@
+mako
+mkdocs
+mkdocs-material
+novella==0.1.7
+-r ../.github/slam-cli.txt
