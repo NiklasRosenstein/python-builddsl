@@ -10,8 +10,8 @@ language (like set literals).
 
     $ pip install craftr-dsl
 
-The `craftr-dsl` package requires at least Python 3.10 or newer.
+The `craftr-dsl` package requires at least Python 3.8.
 
----
+## Projects using Craftr DSL
 
-<p align="center">Copyright &copy; 2021 Niklas Rosenstein</p>
+* [Novella](https://niklasrosenstein.github.io/novella/)
