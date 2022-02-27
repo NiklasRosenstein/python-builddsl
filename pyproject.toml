@@ -15,7 +15,7 @@ packages = [
 
   [tool.poetry.urls]
   Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
-  Documentation = "https://craftr-build.github.io/craftr-dsl/"
+  Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
 
   [tool.poetry.dependencies]
   python = "^3.7"
