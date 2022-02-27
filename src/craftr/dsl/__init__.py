@@ -6,7 +6,7 @@ from ._rewriter import Grammar, SyntaxError
 from ._runtime import ChainContext, Closure, Context, MapContext, ObjectContext
 from ._transpiler import TranspileOptions, transpile_to_ast, transpile_to_source
 
-__version__ = '0.7.6'
+__version__ = '0.7.7'
 
 __all__ = [
   'execute',
