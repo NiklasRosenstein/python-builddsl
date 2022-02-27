@@ -1,0 +1,5 @@
+[[entries]]
+id = "682c2a35-dd0f-47c4-aa42-4bbc4f8563f0"
+type = "improvement"
+description = "support Python 3.8+ (before was 3.10)"
+author = "@NiklasRosenstein"
