@@ -5,6 +5,7 @@ Rewrite Craftr DSL code to pure Python code.
 import contextlib
 import enum
 import logging
+import re
 import string
 import sys
 import typing as t
@@ -60,19 +61,28 @@ class Token(enum.Enum):
   Control = enum.auto()
 
 
+PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
+ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '//=', '**=', '&=', '|=', '^=', '>>=', '<<=', '@=']
+BINARY_OPERATORS = [x[:-1] for x in ASSIGNMENT_OPERATORS[1:]] + ['.', '<', '>', '==', '<=', '>=', 'is', 'and', 'or']
+UNARY_OPERATORS = ['not', '~']
+OTHER_CONTROL_CHARACTERS = list('()[]{},:;') + ['->']
+_ALL_CONTROL_CHARACTERS = sorted(
+  ASSIGNMENT_OPERATORS + BINARY_OPERATORS + UNARY_OPERATORS + OTHER_CONTROL_CHARACTERS,
+  key=len,
+  reverse=True,
+)
+_WORD_CONTROL_CHARACTERS = [op for op in _ALL_CONTROL_CHARACTERS if op.isalpha()]
+
 rule_set = RuleSet((Token.Eof, ''))
 rule_set.rule(Token.Indent, rules.regex_extract(r'[\t ]*', at_line_start_only=True))
 rule_set.rule(Token.Newline, rules.regex_extract(r'\n'))
 rule_set.rule(Token.Whitespace, rules.regex_extract(r'\s+'))
 rule_set.rule(Token.Comment, rules.regex_extract(r'#.*'))
-rule_set.rule(Token.Control, rules.regex_extract(r'is\b|not\b'))
+rule_set.rule(Token.Control, rules.regex_extract('(' + '|'.join(map(re.escape, _WORD_CONTROL_CHARACTERS)) + r')\b'))
 rule_set.rule(Token.Name, rules.regex_extract(r'[A-Za-z\_][A-Za-z0-9\_]*'))
 rule_set.rule(Token.Literal, rules.regex_extract(r'[+\-]?(\d+)(\.\d*)?'))
 rule_set.rule(Token.Literal, rules.string_literal())
-rule_set.rule(
-    Token.Control,
-    rules.regex_extract(
-        r'(\[|\]|\{|\}|\(|\)|<<|<|>>|>|\.|,|\->|\-|!|\+|\*\*|\*|//|/|->|==|<=|>=|<|>|=|:|&|\||^|%|@|;)'))
+rule_set.rule(Token.Control, rules.regex_extract('|'.join(map(re.escape, _ALL_CONTROL_CHARACTERS))))
 
 
 class ProxyToken(_ProxyToken):
@@ -178,11 +188,6 @@ class Rewriter:
   and replaced with whitespace where appropriate to keep line and column numbers of the code in
   tact as much as possible (not always fully accurate).
   """
-
-  UNARY_OPERATORS = frozenset(['not', '~'])
-  BINARY_OPERATORS = frozenset(
-      ['-', '+', '*', '**', '/', '//', '^', '|', '&', '.', '==', '<=', '>=', '<', '>', 'is', '%'])
-  PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
 
   def __init__(self, text: str, filename: str, grammar: t.Optional[Grammar] = None) -> None:
     """
@@ -408,7 +413,7 @@ class Rewriter:
     while token:
       code += self._consume_whitespace(mode)
 
-      if token.type == Token.Control and token.value in self.BINARY_OPERATORS:
+      if token.type == Token.Control and token.value in BINARY_OPERATORS:
         code += token.value
         token.next()
         code += self._rewrite_expr(mode)
@@ -563,7 +568,7 @@ class Rewriter:
       code += token.value
       token.next()
 
-    elif token.type == Token.Control and token.value in self.UNARY_OPERATORS:
+    elif token.type == Token.Control and token.value in UNARY_OPERATORS:
       code += token.value
       token.next()
       code += self._rewrite_expr(mode=mode)
@@ -670,9 +675,10 @@ class Rewriter:
 
     code += self._consume_whitespace(newlines=False)
 
-    if token.tv == (Token.Control, '='):  # Assignment
+    if token.type == Token.Control and token.value in ASSIGNMENT_OPERATORS:
+      op = token.value
       token.next()
-      code += '=' + self._consume_whitespace(newlines=False) + self._rewrite_items(ParseMode.DEFAULT)
+      code += op + self._consume_whitespace(newlines=False) + self._rewrite_items(ParseMode.DEFAULT)
 
     elif token and not token.is_ignorable(True) and not token.is_control(')]}:') and self.grammar.unparen_calls:
       if code[-1].isspace():
@@ -741,7 +747,7 @@ class Rewriter:
     if self.grammar.local_def and token.tv == (Token.Name, self.grammar.local_keyword) and (defcode := self._test_local_def()):
       return code + defcode
 
-    if token.type == Token.Name and token.value in self.PYTHON_BLOCK_KEYWORDS:
+    if token.type == Token.Name and token.value in PYTHON_BLOCK_KEYWORDS:
       # Parse to the next colon.
       # TODO(nrosenstein): If we want to support Craftr DSL syntax in the expressions of block
       #   statements, we'll need to rewrite them on a more granular level.

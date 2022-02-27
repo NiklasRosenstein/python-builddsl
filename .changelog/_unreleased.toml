@@ -1,0 +1,5 @@
+[[entries]]
+id = "97d9bcfa-7685-45cb-bf29-65f4bfbdbd1e"
+type = "fix"
+description = "support more assignment operators like `+=`, `-=`, etc. as well as `and` and `or` binary operators"
+author = "@NiklasRosenstein"

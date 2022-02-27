@@ -1,0 +1,13 @@
+=== TEST some_operators ===
+a ** b
+items = []
+items = items + ['foo', 'bar']
+items += items
+a and b
+=== EXPECTS ===
+a ** b
+items = []
+items = items + ['foo', 'bar']
+items += items
+a and b
+=== END ===
