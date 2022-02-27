@@ -1,0 +1,8 @@
+[[entries]]
+id = "ad9ef265-145b-4317-8d88-20dfae5c9331"
+type = "fix"
+description = "support walrus operator (`:=`)"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/craftr-build/craftr-dsl/issues/5",
+]

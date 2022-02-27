@@ -63,7 +63,7 @@ class Token(enum.Enum):
 
 PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '//=', '**=', '&=', '|=', '^=', '>>=', '<<=', '@=']
-BINARY_OPERATORS = [x[:-1] for x in ASSIGNMENT_OPERATORS[1:]] + ['.', '<', '>', '==', '<=', '>=', 'is', 'and', 'or']
+BINARY_OPERATORS = [x[:-1] for x in ASSIGNMENT_OPERATORS[1:]] + ['.', '<', '>', '==', '<=', '>=', ':=', 'is', 'and', 'or']
 UNARY_OPERATORS = ['not', '~']
 OTHER_CONTROL_CHARACTERS = list('()[]{},:;') + ['->']
 _ALL_CONTROL_CHARACTERS = sorted(

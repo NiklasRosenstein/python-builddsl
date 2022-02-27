@@ -4,10 +4,14 @@ items = []
 items = items + ['foo', 'bar']
 items += items
 a and b
+if a := b:
+  pass
 === EXPECTS ===
 a ** b
 items = []
 items = items + ['foo', 'bar']
 items += items
 a and b
+if a := b:
+  pass
 === END ===
