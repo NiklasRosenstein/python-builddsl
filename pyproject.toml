@@ -16,17 +16,17 @@ Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
 Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 "nr.util" = ">=0.7.0,<1.0.0"
 astor = "^0.8.1"
 termcolor = "^1.1.0"
-dataclasses = {version="^0.6", python="~3.6"}
+# dataclasses = {version="^0.6", python="~3.6"}
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
 mypy = "*"
 types-termcolor = "*"
-types-dataclasses = {version="*", python="~3.6"}
+# types-dataclasses = {version="*", python="~3.6"}
 
 [tool.slap]
 typed = true
