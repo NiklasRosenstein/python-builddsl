@@ -8,6 +8,7 @@ import functools
 import sys
 import types
 import typing as t
+import typing_extensions as te
 
 from nr.util.singleton import NotSet
 
@@ -18,7 +19,7 @@ from ._transpiler import TranspileOptions, transpile_to_ast
 undefined = NotSet.Value
 
 
-class Context(t.Protocol):
+class Context(te.Protocol):
   """
   Protocol for context providers. Context methods are expected to raise a #NameError in case of
   a name resolution error.

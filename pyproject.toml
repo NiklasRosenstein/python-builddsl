@@ -9,61 +9,61 @@ description = "Domain specific language for the Craftr build system."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "readme.md"
-packages = [
-  { include = "craftr/dsl", from="src" }
-]
+packages = [{ include = "craftr/dsl", from="src" }]
 
-  [tool.poetry.urls]
-  Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
-  Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
+[tool.poetry.urls]
+Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
+Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
 
-  [tool.poetry.dependencies]
-  python = "^3.7"
-  "nr.util" = ">=0.7.0,<1.0.0"
-  astor = "^0.8.1"
-  termcolor = "^1.1.0"
+[tool.poetry.dependencies]
+python = "^3.7"
+"nr.util" = ">=0.7.0,<1.0.0"
+astor = "^0.8.1"
+termcolor = "^1.1.0"
+typing-extensions = ">=3.0.0"
+# dataclasses = {version="^0.6", python="~3.6"}
 
-  [tool.poetry.dev-dependencies]
-  pytest = "*"
-  mypy = "*"
-  pydoc-markdown = "^4.5.0"
-  types-termcolor = "*"
+[tool.poetry.dev-dependencies]
+pytest = "*"
+mypy = "*"
+types-termcolor = "*"
+# types-dataclasses = {version="*", python="~3.6"}
 
-[tool.slam]
+[tool.slap]
 typed = true
 
-  [tool.slam.test]
-  pytest = "pytest test/"
-  mypy = "mypy src/ --namespace-packages"
-  check = "slam check"
+[tool.slap.test]
+pytest = "pytest test/"
+mypy = "mypy src/ --namespace-packages --python-version 3.7"
+check = "slap check"
 
 [tool.pydoc-markdown]
 
-  [[tool.pydoc-markdown.loaders]]
-  type = "python"
-  search_path = [ "src" ]
-  packages = [ "craftr.dsl" ]
+[[tool.pydoc-markdown.loaders]]
+type = "python"
+search_path = [ "src" ]
+packages = [ "craftr.dsl" ]
 
-  [tool.pydoc-markdown.renderer]
-  type = "mkdocs"
+[tool.pydoc-markdown.renderer]
+type = "mkdocs"
 
-  [[tool.pydoc-markdown.renderer.pages]]
-  title = "craftr-dsl"
-  name = "index"
-  source = "readme.md"
+[[tool.pydoc-markdown.renderer.pages]]
+title = "craftr-dsl"
+name = "index"
+source = "readme.md"
 
-  [[tool.pydoc-markdown.renderer.pages]]
-  title = "API"
-  contents = [
-    "craftr.dsl._execute.execute",
-    "craftr.dsl._rewriter.Grammar",
-    "craftr.dsl._rewriter.SyntaxError",
-    "craftr.dsl._runtime.ChainContext",
-    "craftr.dsl._runtime.Closure",
-    "craftr.dsl._runtime.Context",
-    "craftr.dsl._runtime.MapContext",
-    "craftr.dsl._runtime.ObjectContext",
-    "craftr.dsl._transpiler.TranspileOptions",
-    "craftr.dsl._transpiler.transpile_to_ast",
-    "craftr.dsl._transpiler.transpile_to_source",
-  ]
+[[tool.pydoc-markdown.renderer.pages]]
+title = "API"
+contents = [
+  "craftr.dsl._execute.execute",
+  "craftr.dsl._rewriter.Grammar",
+  "craftr.dsl._rewriter.SyntaxError",
+  "craftr.dsl._runtime.ChainContext",
+  "craftr.dsl._runtime.Closure",
+  "craftr.dsl._runtime.Context",
+  "craftr.dsl._runtime.MapContext",
+  "craftr.dsl._runtime.ObjectContext",
+  "craftr.dsl._transpiler.TranspileOptions",
+  "craftr.dsl._transpiler.transpile_to_ast",
+  "craftr.dsl._transpiler.transpile_to_source",
+]
