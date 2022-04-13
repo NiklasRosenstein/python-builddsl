@@ -1,0 +1,5 @@
+[[entries]]
+id = "4ccc5254-51f0-4b56-ab48-4935be402396"
+type = "feature"
+description = "support Python 3.7"
+author = "@NiklasRosenstein"
