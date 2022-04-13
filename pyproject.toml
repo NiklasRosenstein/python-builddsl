@@ -27,13 +27,13 @@ mypy = "*"
 pydoc-markdown = "^4.5.0"
 types-termcolor = "*"
 
-[tool.slam]
+[tool.slap]
 typed = true
 
-[tool.slam.test]
+[tool.slap.test]
 pytest = "pytest test/"
-mypy = "mypy src/ --namespace-packages"
-check = "slam check"
+mypy = "mypy src/ --namespace-packages --python-version 3.6"
+check = "slap check"
 
 [tool.pydoc-markdown]
 

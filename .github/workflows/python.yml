@@ -17,11 +17,11 @@ jobs:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.x"]
     steps:
     - uses: actions/checkout@v2
-    - uses: NiklasRosenstein/slam@gha/install/v1
+    - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: slam install --no-venv-check -v
-    - run: slam test
+    - run: slap install --no-venv-check -v
+    - run: slap test
 
   update-pr-numbers:
     if: github.event_name == 'pull_request'
@@ -30,13 +30,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: NiklasRosenstein/slam@gha/changelog/update/v1
+    - uses: NiklasRosenstein/slap@gha/changelog/update/v1
 
   build-documentation:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: NiklasRosenstein/slam@gha/install/v1
+    - uses: NiklasRosenstein/slap@gha/install/v1
     - run: pip install -r docs/requirements.txt
     - run: cd docs && novella
     - uses: JamesIves/github-pages-deploy-action@4.1.4
