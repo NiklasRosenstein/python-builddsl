@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: NiklasRosenstein/slap@gha/install/v1
-      with: { version: '1.4.5' }
+      with: { version: '1.5.0' }
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
     - run: slap install --no-venv-check -v
@@ -38,7 +38,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: NiklasRosenstein/slap@gha/install/v1
-      with: { version: '1.4.5' }
+      with: { version: '1.5.0' }
     - run: pip install -r docs/requirements.txt
     - run: cd docs && novella
     - uses: JamesIves/github-pages-deploy-action@4.1.4
