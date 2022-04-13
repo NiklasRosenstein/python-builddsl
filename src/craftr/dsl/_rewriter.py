@@ -2,8 +2,6 @@
 Rewrite Craftr DSL code to pure Python code.
 """
 
-from __future__ import annotations
-
 import contextlib
 import enum
 import logging
@@ -439,7 +437,7 @@ class Rewriter:
       return len(token.value)
 
   @debug_trace
-  def _check_next_indent(self, min_indent: int) -> int | None:
+  def _check_next_indent(self, min_indent: int) -> t.Union[int, None]:
     with self._lookahead():
       token = ProxyToken(self.tokenizer)
       assert token.type in (Token.Newline, Token.Indent), token
@@ -456,7 +454,7 @@ class Rewriter:
     """
 
     line_indent = self._find_current_line_indent()
-    continuation_indent: int | None = None
+    continuation_indent: t.Union[int, None] = None
 
     token = ProxyToken(self.tokenizer)
     code = ''

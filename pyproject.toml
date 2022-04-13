@@ -20,19 +20,21 @@ python = "^3.6"
 "nr.util" = ">=0.7.0,<1.0.0"
 astor = "^0.8.1"
 termcolor = "^1.1.0"
+dataclasses = {version="^0.6", python="~3.6"}
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
 mypy = "*"
 pydoc-markdown = "^4.5.0"
 types-termcolor = "*"
+types-dataclasses = {version="*", python="~3.6"}
 
 [tool.slap]
 typed = true
 
 [tool.slap.test]
 pytest = "pytest test/"
-mypy = "mypy src/ --namespace-packages --python-version 3.6"
+mypy = "mypy src/ --namespace-packages --python-version 3.7"
 check = "slap check"
 
 [tool.pydoc-markdown]

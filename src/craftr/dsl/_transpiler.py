@@ -4,6 +4,7 @@ Transpile Craftr DSL code to full fledged Python code.
 
 import ast
 import logging
+import sys
 import typing as t
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -63,7 +64,10 @@ def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOpti
 
   options = options or TranspileOptions()
   rewrite = Rewriter(code, filename, options.grammar).rewrite()
-  module = ast.parse(rewrite.code, filename, mode='exec', type_comments=False)
+  if sys.version_info[:2] <= (3, 7):
+    module = ast.parse(rewrite.code, filename, mode='exec')
+  else:
+    module = ast.parse(rewrite.code, filename, mode='exec', type_comments=False)
   module = ClosureRewriter(filename, options, rewrite.closures).visit(module)
   if options.closure_target:
     module = t.cast(ast.Module, NameRewriter(options).visit(module))
@@ -119,7 +123,11 @@ class ClosureRewriter(ast.NodeTransformer):
     self.log.debug('_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
                    '  ' + '\n  '.join(function_code.lstrip().splitlines()))
 
-    module = ast.parse(function_code, self.filename, mode='exec', type_comments=False)
+    if sys.version_info[:2] <= (3, 7):
+      module = ast.parse(function_code, self.filename, mode='exec')
+    else:
+      module = ast.parse(function_code, self.filename, mode='exec', type_comments=False)
+
     func = module.body[0]
     assert isinstance(func, ast.FunctionDef)
     return func
