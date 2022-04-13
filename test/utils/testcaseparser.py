@@ -52,13 +52,17 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
       if section.type == Type.Body and section.value.isspace():
         continue
       options = set()
-      while section and section.type == Type.Marker and (m := re.match(r'OPTION\s+(\w+)', section.value)):
+      while section and section.type == Type.Marker:
+        m = re.match(r'OPTION\s+(\w+)', section.value)
+        if not m:
+          break
         options.add(m.group(1))
         section = next(it, None)
       if not section:
         raise ValueError(f'{filename}: missing TEST section')
       test_section = section
-      if test_section.type != Type.Marker or not (m := re.match(r'(DISABLED\s+)?TEST\s+(\w+)$', test_section.value)):
+      m = re.match(r'(DISABLED\s+)?TEST\s+(\w+)$', test_section.value)
+      if test_section.type != Type.Marker or not m:
         raise ValueError(f'{filename}: expected TEST section at line {test_section.line}, got {test_section}')
       test_disabled = m.group(1)
       test_name = m.group(2)
@@ -66,8 +70,8 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
       if test_body.type != Type.Body:
         raise ValueError(f'{filename}: expected TEST section body at line {test_body.line}')
       expects_section = next(it)
-      if expects_section.type != Type.Marker or not (m := re.match(r'EXPECTS(\s+SYNTAX ERROR)?$',
-                                                                   expects_section.value)):
+      m = re.match(r'EXPECTS(\s+SYNTAX ERROR)?$', expects_section.value)
+      if expects_section.type != Type.Marker or not m:
         raise ValueError(f'{filename}: expected EXPECTS section at line {expects_section.line}, got {expects_section}')
       expects_syntax_error = m.group(1)
       expects_body = next(it)

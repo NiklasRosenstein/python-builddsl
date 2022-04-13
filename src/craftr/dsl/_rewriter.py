@@ -538,7 +538,8 @@ class Rewriter:
       return self._rewrite_dict()
 
     code = ''
-    if closure := self._parse_closure():
+    closure = self._parse_closure()
+    if closure:
       code += closure.id
       self._closures[closure.id] = closure
 
@@ -744,8 +745,10 @@ class Rewriter:
     code += token.value
     token.next()
 
-    if self.grammar.local_def and token.tv == (Token.Name, self.grammar.local_keyword) and (defcode := self._test_local_def()):
-      return code + defcode
+    if self.grammar.local_def and token.tv == (Token.Name, self.grammar.local_keyword):
+      defcode = self._test_local_def()
+      if defcode:
+        return code + defcode
 
     if token.type == Token.Name and token.value in PYTHON_BLOCK_KEYWORDS:
       # Parse to the next colon.
@@ -781,7 +784,10 @@ class Rewriter:
     if parent_indentation is not None and len(token.value) <= parent_indentation:
       raise self._syntax_error(f'expected indent > {parent_indentation}, found {token}')
     indentation = len(token.value)
-    while token and (stmt := self._rewrite_stmt(indentation)):
+    while token:
+      stmt = self._rewrite_stmt(indentation)
+      if not stmt:
+        break
       code += stmt + self._consume_whitespace(True)
     return code
 
