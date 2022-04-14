@@ -26,8 +26,10 @@ typing-extensions = ">=3.0.0"
 astor = ['astor ^0.8.1']
 
 [tool.poetry.dev-dependencies]
-pytest = "*"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
 mypy = "*"
+pytest = "*"
 types-termcolor = "*"
 # types-dataclasses = {version="*", python="~3.6"}
 
@@ -69,3 +71,10 @@ contents = [
   "craftr.dsl._transpiler.transpile_to_ast",
   "craftr.dsl._transpiler.transpile_to_source",
 ]
+
+[tool.kraken.include]
+url = "git+https://github.com/NiklasRosenstein/kraken-templates.git"
+directory = "python/"
+
+[tool.kraken]
+plugins = ["python/slap"]

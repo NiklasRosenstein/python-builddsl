@@ -3,8 +3,10 @@ import functools
 
 depth = 0
 
+
 def debug_trace(func):
   return func
+
   @functools.wraps(func)
   def wrapper(*a, **kw):
     global depth

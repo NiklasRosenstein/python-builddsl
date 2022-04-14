@@ -63,7 +63,8 @@ class Token(enum.Enum):
 
 PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
 ASSIGNMENT_OPERATORS = ['=', '+=', '-=', '*=', '/=', '%=', '//=', '**=', '&=', '|=', '^=', '>>=', '<<=', '@=']
-BINARY_OPERATORS = [x[:-1] for x in ASSIGNMENT_OPERATORS[1:]] + ['.', '<', '>', '==', '<=', '>=', ':=', 'is', 'and', 'or']
+BINARY_OPERATORS = [x[:-1] for x in ASSIGNMENT_OPERATORS[1:]] + [
+  '.', '<', '>', '==', '<=', '>=', ':=', 'is', 'and', 'or']
 UNARY_OPERATORS = ['not', '~']
 OTHER_CONTROL_CHARACTERS = list('()[]{},:;') + ['->']
 _ALL_CONTROL_CHARACTERS = sorted(
@@ -136,7 +137,7 @@ class SyntaxError(Exception):
     lines = [
         '',
         f'  in {colored(self.filename, "blue")} at line {self.line}: {colored(self.message, "red")}',
-        *('  |' + l for l in self.get_text_hint().splitlines()),
+        *('  |' + line for line in self.get_text_hint().splitlines()),
     ]
     return '\n'.join(lines)
 
@@ -372,7 +373,6 @@ class Rewriter:
     assert token.tv == (Token.Control, '('), token
 
     state = token.save()
-    begin = token.pos.offset
     with token.set_skipped({Token.Whitespace, Token.Comment, Token.Newline, Token.Indent}):
       token.next()
 
@@ -381,8 +381,10 @@ class Rewriter:
 
       while token.tv != (Token.Control, ')'):
 
-        if (not is_delimited  # Token is not preceeded by an opening parentheses or comma.
-            or token.type != Token.Name):  # We can only accept a name at this position.
+        if (
+          not is_delimited  # Token is not preceeded by an opening parentheses or comma.
+          or token.type != Token.Name
+        ):  # We can only accept a name at this position.
           token.load(state)
           return None
 

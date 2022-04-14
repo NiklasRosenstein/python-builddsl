@@ -173,7 +173,7 @@ class Closure(Context):
       context_factory: t.Callable[[t.Any], Context] = ObjectContext,
   ) -> None:
     self._parent = parent
-    self._frame = frame  # weakref.ref(frame) if frame else None  # NOTE (@NiklasRosenstein): Cannot create weakref to frame
+    self._frame = frame  # weakref.ref(frame) if frame else None  # NOTE (@NiklasRosenstein): Cannot create weakref to frame  # noqa: E501
     self._target = target
     self._target_context = context_factory(target) if target is not None else None
     self._context_factory = context_factory
@@ -242,7 +242,7 @@ class Closure(Context):
   def __setitem__(self, key: str, value: t.Any) -> None:
     frame = self.frame
     if frame and key in frame.f_locals:
-      raise RuntimeError(f'cannot set local variable through context, this should be handled by the transpiler')
+      raise RuntimeError('cannot set local variable through context, this should be handled by the transpiler')
     if self._target_context is not None:
       try:
         self._target_context[key] = value
@@ -260,7 +260,7 @@ class Closure(Context):
   def __delitem__(self, key: str) -> None:
     frame = self.frame
     if frame and key in frame.f_locals:
-      raise RuntimeError(f'cannot delete local variable through context, this should be handled by the transpiler')
+      raise RuntimeError('cannot delete local variable through context, this should be handled by the transpiler')
     if self._target_context is not None:
       try:
         del self._target_context[key]
