@@ -1,0 +1,5 @@
+[[entries]]
+id = "3e1356fb-8d0c-4f3c-8ea7-986c6c59d224"
+type = "improvement"
+description = "Make `astor` dependency an extra called \"astor\", it is required only for `transpile_to_source()`"
+author = "@NiklasRosenstein"

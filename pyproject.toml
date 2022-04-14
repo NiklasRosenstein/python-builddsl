@@ -18,10 +18,12 @@ Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
 [tool.poetry.dependencies]
 python = "^3.7"
 "nr.util" = ">=0.7.0,<1.0.0"
-astor = "^0.8.1"
 termcolor = "^1.1.0"
 typing-extensions = ">=3.0.0"
 # dataclasses = {version="^0.6", python="~3.6"}
+
+[tool.poetry.extras]
+astor = ['astor ^0.8.1']
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
