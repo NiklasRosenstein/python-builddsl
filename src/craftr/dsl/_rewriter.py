@@ -11,7 +11,7 @@ import sys
 import typing as t
 from dataclasses import dataclass
 
-from nr.util.parsing import (  # type: ignore[attr-defined]  # TODO (@NiklasRosenstein)
+from nr.util.parsing import (
   Cursor,
   ProxyToken as _ProxyToken,
   RuleSet,

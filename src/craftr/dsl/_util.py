@@ -1,9 +1,8 @@
 
 import functools
-import types
 import typing as t
 
-T_Callable = t.TypeVar('T_Callable', bound=types.FunctionType)
+T_Callable = t.TypeVar('T_Callable', bound=t.Callable[..., t.Any])
 depth = 0
 
 
