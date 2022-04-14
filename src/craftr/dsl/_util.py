@@ -1,13 +1,16 @@
 
 import functools
+import types
+import typing as t
 
+T_Callable = t.TypeVar('T_Callable', bound=types.FunctionType)
 depth = 0
 
 
-def debug_trace(func):
+def debug_trace(func: T_Callable) -> T_Callable:
   return func
 
-  @functools.wraps(func)
+  @functools.wraps(func)  # type: ignore[unreachable]
   def wrapper(*a, **kw):
     global depth
     print(depth * '| ' + 'enter', func.__name__)

@@ -11,7 +11,13 @@ import sys
 import typing as t
 from dataclasses import dataclass
 
-from nr.util.parsing import Cursor, ProxyToken as _ProxyToken, RuleSet, Tokenizer, rules
+from nr.util.parsing import (  # type: ignore[attr-defined]  # TODO (@NiklasRosenstein)
+  Cursor,
+  ProxyToken as _ProxyToken,
+  RuleSet,
+  Tokenizer,
+  rules,
+)
 
 try:
   from termcolor import colored

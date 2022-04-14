@@ -78,3 +78,6 @@ directory = "python/"
 
 [tool.kraken]
 plugins = ["python/slap"]
+
+[tool.kraken.task."checkMypy"]
+check_tests = false
