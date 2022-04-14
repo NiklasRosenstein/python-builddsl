@@ -8,8 +8,8 @@ import functools
 import sys
 import types
 import typing as t
-import typing_extensions as te
 
+import typing_extensions as te
 from nr.util.singleton import NotSet
 
 from ._transpiler import TranspileOptions, transpile_to_ast

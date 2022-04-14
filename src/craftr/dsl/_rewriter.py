@@ -10,7 +10,8 @@ import string
 import sys
 import typing as t
 from dataclasses import dataclass
-from nr.util.parsing import rules, Cursor, ProxyToken as _ProxyToken, RuleSet, Tokenizer
+
+from nr.util.parsing import Cursor, ProxyToken as _ProxyToken, RuleSet, Tokenizer, rules
 
 try:
   from termcolor import colored

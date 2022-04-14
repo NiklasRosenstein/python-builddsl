@@ -2,8 +2,8 @@
 from pathlib import Path
 
 import pytest
-
 from craftr.dsl._rewriter import Rewriter, SyntaxError
+
 from .utils.testcaseparser import CaseData, cases_from
 
 
