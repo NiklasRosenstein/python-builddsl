@@ -120,8 +120,8 @@ class ClosureRewriter(ast.NodeTransformer):
     else:
       function_code += (closure.body or '').rstrip() or (' ' * closure.indent + 'pass')
 
-    self.log.debug('_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
-                   '  ' + '\n  '.join(function_code.lstrip().splitlines()))
+    # self.log.debug('_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
+    #                '  ' + '\n  '.join(function_code.lstrip().splitlines()))
 
     if sys.version_info[:2] <= (3, 7):
       module = ast.parse(function_code, self.filename, mode='exec')

@@ -1,0 +1,5 @@
+[[entries]]
+id = "28884e01-f779-46c1-b624-ab5347b72e92"
+type = "improvement"
+description = "Disable debug line that is really just useful for debugging in the project directly;"
+author = "@NiklasRosenstein"
