@@ -1,0 +1,5 @@
+[[entries]]
+id = "65d6b44b-f073-4d22-8f9a-265dbe45c84e"
+type = "fix"
+description = "Support previously missing `!=` comparator"
+author = "@NiklasRosenstein"
