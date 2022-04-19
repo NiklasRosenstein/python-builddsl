@@ -1,14 +1,19 @@
 === TEST python_imports ===
+import os
 from craftr.core.task import Task
+print(os, Task)
 class MyTask(MyPropsBase, Task):
   pass
 def foobar():
+  print(os, Task)
   def baz():
     pass
   return baz
 MyTask(foobar())
 === EXPECTS ===
+import os
 from craftr.core.task import Task
+print(os, Task)
 
 
 class MyTask(MyPropsBase, Task):
@@ -16,6 +21,7 @@ class MyTask(MyPropsBase, Task):
 
 
 def foobar():
+    print(os, Task)
 
     def baz():
         pass

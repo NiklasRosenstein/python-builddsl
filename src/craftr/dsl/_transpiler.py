@@ -248,8 +248,10 @@ class NameRewriter(ast.NodeTransformer):
     for name in node.names:
       if name.asname:
         names.add(name.asname)
-      else:
+      elif '.' in name.name:
         names.add(name.name.rpartition('.')[0])
+      else:
+        names.add(name.name)
     self._add_to_locals(names)
     return self.generic_visit(node)
 

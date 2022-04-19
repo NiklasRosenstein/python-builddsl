@@ -1,0 +1,17 @@
+=== OPTION enable_closures ===
+=== TEST python_imports_with_closure ===
+import os
+from os import sep
+
+print(os, sep)
+def main():
+  print(os, sep)
+=== EXPECTS ===
+import os
+from os import sep
+__closure__['print'](os, sep)
+
+
+def main():
+    __closure__['print'](os, sep)
+=== END ===

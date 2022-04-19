@@ -1,0 +1,8 @@
+[[entries]]
+id = "a27973f8-3c28-4dd4-b0eb-49300af1ae64"
+type = "fix"
+description = "Fix `import module` not treating `module` as a local variable definition"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/NiklasRosenstein/craftr-dsl/issues/8",
+]

@@ -37,7 +37,7 @@ types-termcolor = "*"
 typed = true
 
 [tool.slap.test]
-pytest = "pytest test/"
+pytest = "pytest test/ -vv"
 mypy = "mypy src/ --namespace-packages --python-version 3.7"
 check = "slap check"
 
