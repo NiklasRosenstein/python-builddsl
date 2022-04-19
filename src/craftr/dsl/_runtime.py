@@ -21,8 +21,9 @@ undefined = NotSet.Value
 
 class Context(te.Protocol):
   """
-  Protocol for context providers. Context methods are expected to raise a #NameError in case of
-  a name resolution error.
+  A context implements the behaviour for dynamic name resolution in programs transpiled with
+  Craftr DSL (when dynamic name resolution is enabled). It behaves essentially as a mapping
+  that is used to get/set/delete variables.
   """
 
   def __getitem__(self, key: str) -> t.Any:
@@ -34,11 +35,16 @@ class Context(te.Protocol):
   def __delitem__(self, key: str) -> None:
     ...
 
+  def chain_with(self, other: 'Context') -> 'ChainContext':
+    return ChainContext(self, other)
+
 
 class ObjectContext(Context):
   """
-  Looks up names that exist in a wrapped object. Only sets or deletes them if they exist, otherwise
-  raises a #NameError. It prevents you from overwriting methods.
+  Proxies an object's members for get/set/delete operations of the dynamic name resolution.
+
+  Raises a #RuntimeError if there is an attempted to set or delete an attribute that appears
+  to be a method of the object.
   """
 
   def __init__(self, target: t.Any) -> None:
@@ -57,22 +63,22 @@ class ObjectContext(Context):
     current = getattr(self._target, key, undefined)
     if current is undefined:
       raise self._error(key)
-    if isinstance(current, types.MethodType):
-      raise RuntimeError(f'cannot override method {type(self._target).__name__}.{key}()')
+    if isinstance(current, types.MethodType) and current.__self__ is current:
+      raise RuntimeError(f'cannot overwrite method {type(self._target).__name__}.{key}()')
     setattr(self._target, key, value)
 
   def __delitem__(self, key: str) -> None:
     current = getattr(self._target, key, undefined)
     if current is undefined:
       raise self._error(key)
-    if isinstance(current, types.MethodType):
+    if isinstance(current, types.MethodType) and current.__self__ is current:
       raise RuntimeError(f'cannot delete method {type(self._target).__name__}.{key}()')
     delattr(self._target, key)
 
 
 class MapContext(Context):
   """
-  Similar to #ObjectContext, but acts on a mapping instead.
+  Delegates dynamic name resolution to a mapping.
   """
 
   def __init__(self, target: t.MutableMapping, description: str) -> None:
@@ -134,6 +140,9 @@ class ChainContext(Context):
         pass
     raise NameError(key)
 
+  def chain_with(self, other: Context) -> 'ChainContext':
+    return ChainContext(*self._contexts, other)
+
 
 class Closure(Context):
   r"""
@@ -171,11 +180,26 @@ class Closure(Context):
       frame: t.Optional[types.FrameType],
       target: t.Any,
       context_factory: t.Callable[[t.Any], Context] = ObjectContext,
+      target_context: t.Optional[Context] = None,
   ) -> None:
+    """
+    Args:
+      parent: The parent context. Dynamic name resolution is delegated to the parent if the current
+        context fails to provide it.
+      frame: The Python frame in which the closure is defined.
+      target: The target object that is wrapped by the closure.
+      context_factory: A factory to create #Context#s for closures defined inside this closure.
+      target_context: The context for this closure. If not given, it will be created using the
+        *context_factory*.
+    """
     self._parent = parent
     self._frame = frame  # weakref.ref(frame) if frame else None  # NOTE (@NiklasRosenstein): Cannot create weakref to frame  # noqa: E501
     self._target = target
-    self._target_context = context_factory(target) if target is not None else None
+    self._target_context = (
+      (context_factory(target) if target is not None else None)
+      if target_context is None
+      else target_context
+    )
     self._context_factory = context_factory
 
   def __repr__(self) -> str:

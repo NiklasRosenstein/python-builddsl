@@ -1,0 +1,11 @@
+[[entries]]
+id = "b34d4529-71ef-44ec-a5fd-46305d3228e1"
+type = "improvement"
+description = "Add `Context.chain_with()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6b5a95cb-da86-4767-937a-f396205e79de"
+type = "improvement"
+description = "Add `Closure(target_context)` parameter"
+author = "@NiklasRosenstein"
