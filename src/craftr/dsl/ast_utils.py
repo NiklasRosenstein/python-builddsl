@@ -5,6 +5,8 @@ import contextlib
 import dataclasses
 import typing as t
 
+T_AST = t.TypeVar('T_AST', bound=ast.AST)
+
 
 @dataclasses.dataclass
 class DynamicLookupRewriter(ast.NodeTransformer):
@@ -119,11 +121,5 @@ class DynamicLookupRewriter(ast.NodeTransformer):
     self.visit_Import(ast.Import(names=node.names))  # Dispatch name detection
     return self.generic_visit(node)
 
-  @t.overload
-  def visit(self, __module: ast.Module) -> ast.Module: ...
-
-  @t.overload
-  def visit(self, __node: ast.AST) -> ast.AST: ...
-
-  def visit(self, node: ast.Module | ast.AST) -> ast.Module | ast.AST:
+  def visit(self, node: T_AST) -> T_AST:
     return super().visit(node)
