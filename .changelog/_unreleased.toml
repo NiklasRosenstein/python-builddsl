@@ -1,0 +1,5 @@
+[[entries]]
+id = "d1759fbb-2ef4-4e70-9fb3-48bce50014e5"
+type = "feature"
+description = "Expose `NameRewriter` functionality as a a public API under the name `craftr.dsl.ast_utils.DynamicLookupRewriter`"
+author = "@NiklasRosenstein"
