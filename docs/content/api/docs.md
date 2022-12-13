@@ -1,23 +1,23 @@
 # Documentation
 
-@pydoc craftr.dsl.execute
+@pydoc builddsl.execute
 
-@pydoc craftr.dsl.Grammar
+@pydoc builddsl.Grammar
 
-@pydoc craftr.dsl.SyntaxError
+@pydoc builddsl.SyntaxError
 
-@pydoc craftr.dsl.ChainContext
+@pydoc builddsl.ChainContext
 
-@pydoc craftr.dsl.Closure
+@pydoc builddsl.Closure
 
-@pydoc craftr.dsl.Context
+@pydoc builddsl.Context
 
-@pydoc craftr.dsl.MapContext
+@pydoc builddsl.MapContext
 
-@pydoc craftr.dsl.ObjectContext
+@pydoc builddsl.ObjectContext
 
-@pydoc craftr.dsl.TranspileOptions
+@pydoc builddsl.TranspileOptions
 
-@pydoc craftr.dsl.transpile_to_ast
+@pydoc builddsl.transpile_to_ast
 
-@pydoc craftr.dsl.transpile_to_source
+@pydoc builddsl.transpile_to_source

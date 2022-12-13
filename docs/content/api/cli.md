@@ -1,5 +1,5 @@
 # Command-line
 
 ```
-@shell python -m craftr.dsl -h
+@shell python -m builddsl -h
 ```

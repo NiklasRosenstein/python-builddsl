@@ -12,7 +12,7 @@ def execute(
     options: t.Optional[TranspileOptions] = None,
 ) -> None:
   """
-  Executes Craftr DSL code in the context specified with *globals* and *locals*.
+  Executes BuildDSL code in the context specified with *globals* and *locals*.
 
   @param code: The code to execute.
   @param filename: The filename where the code is from; shown in errors.

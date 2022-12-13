@@ -6,7 +6,7 @@ import sys
 
 from . import Closure, execute, transpile_to_source
 
-parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')
+parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m builddsl')
 parser.add_argument('file', nargs='?')
 parser.add_argument('-c', '--context', metavar='ENTRYPOINT')
 parser.add_argument('-E', '--transpile', action='store_true')

@@ -7,7 +7,7 @@ supported.
 
 ## Example 1
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     print 'Hello, World!', file=sys.stderr
@@ -21,7 +21,7 @@ supported.
 
 ## Example 2
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     map {

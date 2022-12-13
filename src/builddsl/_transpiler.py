@@ -1,5 +1,5 @@
 """
-Transpile Craftr DSL code to full fledged Python code.
+Transpile BuildDSL code to full fledged Python code.
 """
 
 import ast
@@ -15,7 +15,7 @@ from .ast_utils import DynamicLookupRewriter
 
 @dataclass
 class TranspileOptions:
-  """ Options for transpiling Craftr DSL code. """
+  """ Options for transpiling BuildDSL code. """
 
   #: If enabled, names are read, written and deleted through the `__getitem__()`, `__setitem__()` and
   #: `__delitem__()` of the given name. If you need extra flexibility, you can set this to the name of
@@ -31,10 +31,12 @@ class TranspileOptions:
   local_vardef_prefix: str = '_def_'
 
   #: A preamble of pure Python code to include at the top of the module.
-  preamble: str = ''  # 'from craftr.core.closure import closure as __closure_decorator__\n'
+  #: Example: `'from myruntime import __closure_decorator__\n'`
+  preamble: str = ''
 
   #: Pure python code to include before a closure definition, for example to decorate it.
-  closure_def_prefix: str = ''  # '@__closure_decorator__(__closure__)\n'
+  #: Example: `'@__closure_decorator__(__closure__)\n'`
+  closure_def_prefix: str = ''
 
   #: The default argument list for closures without an explicit argument list. By default a
   #: closure always accepts a "self" argument, but also any other arguments that are passed
@@ -60,7 +62,7 @@ class TranspileOptions:
 
 def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> ast.Module:
   """
-  Transpile the Craftr DSL *code* to a Python `ast.Module` that can be executed.
+  Transpile the BuildDSL *code* to a Python `ast.Module` that can be executed.
   """
 
   options = options or TranspileOptions()
@@ -78,7 +80,7 @@ def transpile_to_ast(code: str, filename: str, options: t.Optional[TranspileOpti
 
 def transpile_to_source(code: str, filename: str, options: t.Optional[TranspileOptions] = None) -> str:
   """
-  Transpile the Craftr DSL *code* to Python code. Requires the `astor` module to be installed.
+  Transpile the BuildDSL *code* to Python code. Requires the `astor` module to be installed.
   """
 
   from astor import to_source  # type: ignore

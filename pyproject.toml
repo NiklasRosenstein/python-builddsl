@@ -3,17 +3,17 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "craftr-dsl"
+name = "builddsl"
 version = "0.9.0"
-description = "Domain specific language for the Craftr build system."
+description = "A superset of the Python programming language with support for closures and multi-line lambdas."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "readme.md"
-packages = [{ include = "craftr/dsl", from="src" }]
+packages = [{ include = "builddsl", from="src" }]
 
 [tool.poetry.urls]
-Homepage = "https://github.com/NiklasRosenstein/craftr-dsl"
-Documentation = "https://niklasrosenstein.github.io/craftr-dsl/"
+Homepage = "https://github.com/NiklasRosenstein/python-builddsl"
+Documentation = "https://niklasrosenstein.github.io/python-builddsl/"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -26,58 +26,27 @@ typing-extensions = ">=3.0.0"
 astor = ['astor ^0.8.1']
 
 [tool.poetry.dev-dependencies]
-flake8 = "^4.0.1"
-isort = "^5.10.1"
+black = "*"
+flake8 = "*"
+isort = "*"
 mypy = "*"
 pytest = "*"
 types-termcolor = "*"
 # types-dataclasses = {version="*", python="~3.6"}
+astor = "^0.8.1"
 
 [tool.slap]
 typed = true
 
 [tool.slap.test]
-pytest = "pytest test/ -vv"
-mypy = "mypy src/ --namespace-packages --python-version 3.7"
+black = "black --check src/"
 check = "slap check"
+flake8 = "flake8 src/"
+isort = "isort --check-only src/"
+mypy = "dmypy run src/"
+pytest = "pytest test/ -vv"
 
-[tool.pydoc-markdown]
-
-[[tool.pydoc-markdown.loaders]]
-type = "python"
-search_path = [ "src" ]
-packages = [ "craftr.dsl" ]
-
-[tool.pydoc-markdown.renderer]
-type = "mkdocs"
-
-[[tool.pydoc-markdown.renderer.pages]]
-title = "craftr-dsl"
-name = "index"
-source = "readme.md"
-
-[[tool.pydoc-markdown.renderer.pages]]
-title = "API"
-contents = [
-  "craftr.dsl._execute.execute",
-  "craftr.dsl._rewriter.Grammar",
-  "craftr.dsl._rewriter.SyntaxError",
-  "craftr.dsl._runtime.ChainContext",
-  "craftr.dsl._runtime.Closure",
-  "craftr.dsl._runtime.Context",
-  "craftr.dsl._runtime.MapContext",
-  "craftr.dsl._runtime.ObjectContext",
-  "craftr.dsl._transpiler.TranspileOptions",
-  "craftr.dsl._transpiler.transpile_to_ast",
-  "craftr.dsl._transpiler.transpile_to_source",
-]
-
-[tool.kraken.include]
-url = "git+https://github.com/NiklasRosenstein/kraken-templates.git"
-directory = "python/"
-
-[tool.kraken]
-plugins = ["python/slap"]
-
-[tool.kraken.task."checkMypy"]
-check_tests = false
+[tool.slap.run]
+"docs:build" = "cd docs && novella --base-url kraken-core/"
+"docs:dev" = "cd docs && novella --serve"
+fmt = "black src/ && isort src/"

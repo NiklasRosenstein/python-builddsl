@@ -1,5 +1,5 @@
 """
-Helpers for added runtime capabilities of transpiled Craftr DSL code, specifically around variable
+Helpers for added runtime capabilities of transpiled BuildDSL code, specifically around variable
 name resolution when enabling #TranspileOptions.closure_target.
 """
 
@@ -22,7 +22,7 @@ undefined = NotSet.Value
 class Context(te.Protocol):
   """
   A context implements the behaviour for dynamic name resolution in programs transpiled with
-  Craftr DSL (when dynamic name resolution is enabled). It behaves essentially as a mapping
+  BuildDSL (when dynamic name resolution is enabled). It behaves essentially as a mapping
   that is used to get/set/delete variables.
   """
 
@@ -146,7 +146,7 @@ class ChainContext(Context):
 
 class Closure(Context):
   r"""
-  This class serves as a mapping to use for dynamic name lookup when transpiling Craftr DSL code to Python.
+  This class serves as a mapping to use for dynamic name lookup when transpiling BuildDSL code to Python.
   Several options in the #TranspileOptions need to be tweaked for this to work correctly as the closure
   hierarchy needs to be built up manually:
 
@@ -231,7 +231,7 @@ class Closure(Context):
       scope: t.Optional[t.Dict[str, t.Any]] = None,
   ) -> None:
     """
-    Executes the given Craftr DSL *code* with the #Closure as it's entry `__closure__` object.
+    Executes the given BuildDSL *code* with the #Closure as it's entry `__closure__` object.
     """
 
     if options:

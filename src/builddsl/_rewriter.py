@@ -1,5 +1,5 @@
 """
-Rewrite Craftr DSL code to pure Python code.
+Rewrite BuildDSL code to pure Python code.
 """
 
 import contextlib
@@ -126,7 +126,7 @@ class ParseMode(enum.IntFlag):
 @dataclass
 class SyntaxError(Exception):
   """
-  Specialized Craftr DSL syntax error (the internal SyntaxError class is weird).
+  Specialized BuildDSL syntax error (the internal SyntaxError class is weird).
 
   If the `termcolor` module is installed, the error message will be color coded.
   """
@@ -180,10 +180,10 @@ class Closure:
 @dataclass
 class RewriteResult:
   """
-  The result of rewriting Craftr DSL code to pure Python code.
+  The result of rewriting BuildDSL code to pure Python code.
   """
 
-  #: The Craftr DSL code rewritten as Python code.
+  #: The BuildDSL code rewritten as Python code.
   code: str
 
   #: The closures extracted from the code.
@@ -192,7 +192,7 @@ class RewriteResult:
 
 class Rewriter:
   """
-  This class rewrites Craftr DSL code to pure Python code. Closures are extracted from the code
+  This class rewrites BuildDSL code to pure Python code. Closures are extracted from the code
   and replaced with whitespace where appropriate to keep line and column numbers of the code in
   tact as much as possible (not always fully accurate).
   """
@@ -200,7 +200,7 @@ class Rewriter:
   def __init__(self, text: str, filename: str, grammar: t.Optional[Grammar] = None) -> None:
     """
     # Arguments
-    text: The Craftr DSL code to parse and turn into an AST-like structure.
+    text: The BuildDSL code to parse and turn into an AST-like structure.
     filename: The filename where the DSL code is from.
     """
 
@@ -536,7 +536,7 @@ class Rewriter:
   @debug_trace
   def _rewrite_atom(self, mode: ParseMode = ParseMode.DEFAULT) -> str:
     """
-    Consumes a Python or Craftr DSL language atom and returns it rewritten as pure Python code. If
+    Consumes a Python or BuildDSL language atom and returns it rewritten as pure Python code. If
     a closure is encountered, it will be replaced with a name reference and the closure itself will
     be stored in the #_closures mapping.
     """
@@ -761,7 +761,7 @@ class Rewriter:
 
     if token.type == Token.Name and token.value in PYTHON_BLOCK_KEYWORDS:
       # Parse to the next colon.
-      # TODO(nrosenstein): If we want to support Craftr DSL syntax in the expressions of block
+      # TODO(nrosenstein): If we want to support BuildDSL syntax in the expressions of block
       #   statements, we'll need to rewrite them on a more granular level.
       while token and token.tv not in ((Token.Newline, '\n'), (Token.Control, ':')):
         code += token.value
@@ -804,7 +804,7 @@ class Rewriter:
   def rewrite(self) -> RewriteResult:
     """
     Rewrite the code and return the #RewriteResult. This can be interpreted by the
-    #craftr.dsl.transpiler.ClosureRewriter to re-inject the code for closures.
+    #builddsl.transpiler.ClosureRewriter to re-inject the code for closures.
     """
 
     return RewriteResult(self._rewrite_stmt_block(), self._closures)

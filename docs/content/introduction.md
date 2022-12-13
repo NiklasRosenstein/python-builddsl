@@ -1,8 +1,6 @@
 # Introduction
 
-Craftr DSL is a Python superset language inspired by Gradle. It was designed for as the main configuration language
-for the [Craftr build system](https://github.com/craftr-build). Albeit as of writing this (Feb 27, 2022), the Craftr
-build system itself is not mature, the DSL is relatively stable.
+BuildDSL is a Python superset language inspired by Gradle.
 
 It introduces additional syntactic constructs into the language, such as paren-less function calls, colon keyword
 arguments, paren-less line-spanning statements without newline escaping and multi-line lambdas (called "closures").
@@ -12,10 +10,10 @@ that does not require prefixing members of the closure target with `self`.
 
 ## Example
 
-This might be a bit of a convoluted way to print "Hello, World", but it shows well how closures in Craftr DSL work:
+This might be a bit of a convoluted way to print "Hello, World", but it shows well how closures in BuildDSL work:
 
 ```py
-# hello.craftr
+# hello.build
 world = { self('World!') }
 world {
   print('Hello,', self)
@@ -27,7 +25,7 @@ This transpiles to
 === "Standard"
 
     ```py
-    # $ python -m craftr.dsl hello.craftr -E | grep -v -e '^$'
+    # $ python -m builddsl hello.build -E | grep -v -e '^$'
     def _closure_1(self, *arguments, **kwarguments):
         self('World!')
     world = _closure_1
@@ -39,7 +37,7 @@ This transpiles to
 === "Dynamic name resolution"
 
     ```py
-    # $ python -m craftr.dsl hello.craftr -E -C | grep -v -e '^$'
+    # $ python -m builddsl hello.build -E -C | grep -v -e '^$'
     @__closure__.child
     def _closure_1(__closure__, self, *arguments, **kwarguments):
         self('World!')
@@ -53,14 +51,14 @@ This transpiles to
 And evaluates to
 
 ```py
-# $ python -m craftr.dsl hello.craftr
+# $ python -m builddsl hello.build
 Hello, World!
 ```
 
 !!! note
 
-    Craftr DSL is not usually designed to be used for standalone scripts, but usually as a configuration language
-    for other systems. It is therefore uncommon to run any production code through `python -m craftr.dsl`. Code
+    BuildDSL is not usually designed to be used for standalone scripts, but usually as a configuration language
+    for other systems. It is therefore uncommon to run any production code through `python -m builddsl`. Code
     transpiled using **dynamic name resolution** requires a root closure to be supplied as well, which is not possible
     via the command-line.
 

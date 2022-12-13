@@ -5,7 +5,7 @@ an argument list automatically has the signature `(self, *argnames, **kwargnames
 
 ## Example 1
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     filter({ self % 2 }, range(5))
@@ -21,7 +21,7 @@ an argument list automatically has the signature `(self, *argnames, **kwargnames
 
 ## Example 2
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     filter(x -> x % 2, range(5))
@@ -37,7 +37,7 @@ an argument list automatically has the signature `(self, *argnames, **kwargnames
 
 ## Example 3
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     reduce((a, b) -> {

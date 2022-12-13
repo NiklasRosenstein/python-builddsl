@@ -1,5 +1,5 @@
 
-""" Domain specific language for the Craftr build system. """
+""" A superset of the Python programming language with support for closures and multi-line lambdas. """
 
 from ._execute import execute
 from ._rewriter import Grammar, SyntaxError

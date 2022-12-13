@@ -1,5 +1,5 @@
 template "mkdocs"
 
 action "mkdocs-update-config" {
-  site_name = "Craftr DSL"
+  site_name = "BuildDSL"
 }

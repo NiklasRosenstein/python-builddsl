@@ -1,6 +1,6 @@
 # Limitations
 
-Craftr DSL is intended to behave as a complete syntactic superset of standard Python. However there are currently
+BuildDSL is intended to behave as a complete syntactic superset of standard Python. However there are currently
 some limitations, namely:
 
 * Literal sets cannot be expressed due to the grammar conflict with parameter-less closures

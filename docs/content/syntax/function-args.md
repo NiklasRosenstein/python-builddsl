@@ -1,11 +1,11 @@
 # Unseparated arguments & colon keyword arguments
 
-The Craftr DSL allows passing arguments to function calls without separation by commas.
+The BuildDSL allows passing arguments to function calls without separation by commas.
 Keyword arguments may be specified using colons (`:`) instead of equal signs (`=`).
 
 ## Example 1
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     print 'Hello, World!' 42 * 1 + 10 file: sys.stdout
@@ -19,7 +19,7 @@ Keyword arguments may be specified using colons (`:`) instead of equal signs (`=
 
 ## Example 2
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     task "hello_world" do: {
@@ -37,7 +37,7 @@ Keyword arguments may be specified using colons (`:`) instead of equal signs (`=
 
 ## Example 3
 
-=== "Craftr DSL"
+=== "BuildDSL"
 
     ```py
     list(map {

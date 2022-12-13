@@ -28,11 +28,11 @@ class CaseData:
 
 def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> t.Iterator[CaseData]:
   """
-  Parses a Craftr DSL parser test case file. Such a file must be of the following form:
+  Parses a BuildDSL parser test case file. Such a file must be of the following form:
 
   ```
   === TEST <test_name> ===
-  <craftr_dsl_code>
+  <builddsl_code>
   <...>
   === EXPECTS ===
   <generated_python_code>

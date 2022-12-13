@@ -2,6 +2,6 @@
 title: Home
 ---
 
-# Welcome to the Craftr DSL documentation!
+# Welcome to the BuildDSL documentation!
 
 @cat ../../readme.md :with slice_lines = "2:"

@@ -6,5 +6,5 @@ type = "fix"
 description = "Fix `import module` not treating `module` as a local variable definition"
 author = "@NiklasRosenstein"
 issues = [
-    "https://github.com/NiklasRosenstein/craftr-dsl/issues/8",
+    "https://github.com/NiklasRosenstein/python-builddsl/issues/8",
 ]

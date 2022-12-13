@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 
 import pytest
-from craftr.dsl._runtime import Closure
-from craftr.dsl._transpiler import transpile_to_source
+from builddsl._runtime import Closure
+from builddsl._transpiler import transpile_to_source
 
 code = """
 task "foobar" do: {

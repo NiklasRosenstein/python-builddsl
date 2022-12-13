@@ -6,5 +6,5 @@ type = "fix"
 description = "support walrus operator (`:=`)"
 author = "@NiklasRosenstein"
 issues = [
-    "https://github.com/craftr-build/craftr-dsl/issues/5",
+    "https://github.com/NiklasRosenstein/python-builddsl/issues/5",
 ]
