@@ -19,6 +19,10 @@ an argument list automatically has the signature `(self, *argnames, **kwargnames
     filter(_closure_1, range(5))
     ```
 
+!!! note "No return statement"
+
+    Note how a closure surrounded by braces does not have an implicit return statement.
+
 ## Example 2
 
 === "BuildDSL"

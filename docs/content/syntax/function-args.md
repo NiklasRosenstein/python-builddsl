@@ -40,9 +40,7 @@ Keyword arguments may be specified using colons (`:`) instead of equal signs (`=
 === "BuildDSL"
 
     ```py
-    list(map {
-      print('Hello,', self)
-    }, ['John', 'World'])
+    list(map { print('Hello,', self) } ['John', 'World'])
     ```
 
 === "Python"
@@ -50,7 +48,26 @@ Keyword arguments may be specified using colons (`:`) instead of equal signs (`=
     ```py
     def _closure_1(self, *arguments, **kwarguments):
         print('Hello,', self)
-    list(map, _closure_1, ['John', 'World'])
+    list(map, _closure_1['John', 'World'])
     ```
 
-> **Note**: Pitfall, this actually passes three arguments to `list()`.
+!!! danger Pitfall
+
+    Note how this actually passes all arguments to `list()` and it tries to index an element on the closure.
+    The outer-most statement has the priority to receive the arguments, and subscripting takes precedence over
+    the subscript being treated as a separate argument.
+
+=== "BuildDSL"
+
+    ```py
+    list(map({ print('Hello,', self) }, ['John', 'World']))
+    ```
+
+=== "Python"
+
+    ```py
+    def _closure_1(self, *arguments, **kwarguments):
+        print('Hello,', self)
+
+    list(map(_closure_1['John', 'World']))
+    ```
