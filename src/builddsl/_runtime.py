@@ -5,10 +5,10 @@ name resolution when enabling #TranspileOptions.closure_target.
 
 import builtins
 import enum
-import functools
 import sys
 import types
 import typing as t
+from dataclasses import dataclass
 
 import typing_extensions as te
 
@@ -156,7 +156,7 @@ class Closure(Context):
     hierarchy needs to be built up manually:
 
     * Set #TranspileOptions.closure_target to `__closure__`
-    * Set #TranspileOptions.closure_def_prefix to `@__closure__.child\n`
+    * Set #TranspileOptions.closure_def_prefix to `@__closure__.subclosure\n`
     * Set #TranspileOptions.closure_arglist_prefix to `__closure__,`
 
     You can initialize a #TranspileOptions object with these values using #init_options().
@@ -169,7 +169,7 @@ class Closure(Context):
     @staticmethod
     def init_options(options: TranspileOptions) -> None:
         options.closure_target = "__closure__"
-        options.closure_def_prefix = "@__closure__.child\n"
+        options.closure_def_prefix = "@__closure__.subclosure\n"
         options.closure_arglist_prefix = "__closure__,"
 
     @staticmethod
@@ -181,9 +181,9 @@ class Closure(Context):
 
     def __init__(
         self,
-        parent: t.Optional["Closure"],
-        frame: t.Optional[types.FrameType],
-        target: t.Any,
+        parent: t.Optional["Closure"] = None,
+        frame: t.Optional[types.FrameType] = None,
+        target: t.Any = None,
         context_factory: t.Callable[[t.Any], Context] = ObjectContext,
         target_context: t.Optional[Context] = None,
     ) -> None:
@@ -197,6 +197,7 @@ class Closure(Context):
           target_context: The context for this closure. If not given, it will be created using the
             *context_factory*.
         """
+
         self._parent = parent
         self._frame = frame  # weakref.ref(frame) if frame else None  # NOTE (@NiklasRosenstein): Cannot create weakref to frame  # noqa: E501
         self._target = target
@@ -212,19 +213,14 @@ class Closure(Context):
     def frame(self) -> t.Optional[types.FrameType]:
         return self._frame
 
-    def child(self, func: t.Callable[..., t.Any], frame: t.Optional[types.FrameType] = None) -> t.Callable[..., t.Any]:
-
+    def subclosure(self, func: t.Callable[..., t.Any], frame: t.Optional[types.FrameType] = None) -> "UnboundClosure":
         if frame is None:
             frame = sys._getframe(1)
-        closure = Closure(self, frame, None, self._context_factory)
+
+        closure = UnboundClosure(self, frame, func)
         del frame
 
-        @functools.wraps(func)
-        def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
-            __closure__ = Closure(self, closure.frame, args[0], self._context_factory) if args else closure
-            return func(__closure__, *args, **kwargs)
-
-        return _wrapper
+        return closure
 
     def run_code(
         self,
@@ -301,3 +297,18 @@ class Closure(Context):
             except NameError:
                 pass
         raise NameError(f"unclear where to delete {key!r}")
+
+    @staticmethod
+    def from_map(m: t.MutableMapping[str, t.Any]) -> "Closure":
+        return Closure(None, None, m, ObjectContext, MapContext(m, "Closure.from_map()"))
+
+
+@dataclass
+class UnboundClosure:
+    parent: Closure
+    frame: types.FrameType
+    func: t.Callable[..., t.Any]
+
+    def __call__(self, *args: t.Any, **kwargs: t.Any) -> t.Any:
+        __closure__ = Closure(self.parent, self.frame, args[0] if args else None, self.parent._context_factory)
+        return self.func(__closure__, *args, **kwargs)

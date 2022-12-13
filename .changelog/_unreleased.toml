@@ -1,0 +1,5 @@
+[[entries]]
+id = "e676844a-624a-4709-b01b-74499cda90a3"
+type = "feature"
+description = "add `UnboundClosure` intermediate type"
+author = "@NiklasRosenstein"

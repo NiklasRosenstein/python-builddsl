@@ -5,7 +5,7 @@
   print(nr.fs)
 }
 === EXPECTS ===
-@__closure__.child
+@__closure__.subclosure
 def _closure_1(__closure__, self, *arguments, **kwarguments):
     import nr.fs
     __closure__['print'](nr.fs)

@@ -39,17 +39,17 @@ types-dataclasses = "*"
 typed = true
 
 [tool.slap.test]
-black = "black --check src/"
+black = "black --check src/ examples/"
 check = "slap check"
-flake8 = "flake8 src/"
-isort = "isort --check-only src/"
-mypy = "dmypy run src/"
+flake8 = "flake8 src/ examples/"
+isort = "isort --check-only src/ examples/"
+mypy = "dmypy run src/ examples/"
 pytest = "pytest test/ -vv"
 
 [tool.slap.run]
 "docs:build" = "cd docs && novella --base-url kraken-core/"
 "docs:dev" = "cd docs && novella --serve"
-fmt = "black src/ && isort src/"
+fmt = "black src/ examples/ && isort src/ examples/"
 
 [tool.mypy]
 explicit_package_bases = true
