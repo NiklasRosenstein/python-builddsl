@@ -38,11 +38,11 @@ This transpiles to
 
     ```py
     # $ python -m builddsl hello.build -E -C | grep -v -e '^$'
-    @__closure__.child
+    @__closure__.subclosure
     def _closure_1(__closure__, self, *arguments, **kwarguments):
         self('World!')
     __closure__['world'] = _closure_1
-    @__closure__.child
+    @__closure__.subclosure
     def _closure_2(__closure__, self, *arguments, **kwarguments):
         __closure__['print']('Hello,', self)
     __closure__['world'](_closure_2)
