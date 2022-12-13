@@ -20,7 +20,7 @@ class CaseData:
   expects_syntax_error: bool
   outputs: t.Optional[str]
   outputs_line: t.Optional[int]
-  options: set[str]
+  options: t.Set[str]
 
 
 def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> t.Iterator[CaseData]:

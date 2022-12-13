@@ -4,3 +4,4 @@
 *.egg-info
 /.python-version
 /.kraken/
+.dmypy.json
