@@ -50,3 +50,30 @@ pytest = "pytest test/ -vv"
 "docs:build" = "cd docs && novella --base-url kraken-core/"
 "docs:dev" = "cd docs && novella --serve"
 fmt = "black src/ && isort src/"
+
+[tool.mypy]
+explicit_package_bases = true
+mypy_path = ["src"]
+namespace_packages = true
+pretty = true
+python_version = "3.7"
+show_error_codes = true
+show_error_context = true
+strict = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+ignore_errors = true
+ignore_missing_imports = true
+module = "networkx.*"
+
+[tool.isort]
+combine_as_imports = true
+line_length = 120
+profile = "black"
+
+[tool.black]
+line-length = 120
