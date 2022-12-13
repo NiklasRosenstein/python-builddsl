@@ -523,7 +523,7 @@ to use dynamic name resolution. Example usage:</p>
 </code></pre></div>
 <p>The <code>Closure.get_options()</code> function returns <code>TranspileOptions</code> that instruct the transpiler
 to convert name lookups into subscripts on the <code>__closure__</code> variable, add a
-<code>@__closure__.child</code> decoration before every closure function definition and to add a
+<code>@__closure__.subclosure</code> decoration before every closure function definition and to add a
 <code>__closure__,</code> argument to their arglist. The <code>Closure</code> object passed into the <code>scope</code>
 on execution deals with the rest.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">BuildDSL</label><label for="__tabbed_1_2">Python</label></div>
@@ -545,21 +545,21 @@ on execution deals with the rest.</p>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+<div class="highlight"><pre><span></span><code><span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
 <span class="k">def</span> <span class="nf">_closure_1</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="k">return</span> <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;n_times&#39;</span><span class="p">]</span>
 <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">](</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="n">do</span><span class="o">=</span><span class="n">_closure_1</span><span class="p">)</span>
 
-<span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+<span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
 <span class="k">def</span> <span class="nf">_closure_2</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="n">n_times</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">n_times</span>
 <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">](</span><span class="s1">&#39;belzebub&#39;</span><span class="p">,</span> <span class="n">do</span><span class="o">=</span><span class="n">_closure_2</span><span class="p">)</span>
 
-<span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+<span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
 <span class="k">def</span> <span class="nf">_closure_3</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="n">n_times</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+    <span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
     <span class="k">def</span> <span class="nf">_closure_3_closure_3</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">n_times</span>
     <span class="k">return</span> <span class="n">_closure_3_closure_3</span><span class="p">()</span>

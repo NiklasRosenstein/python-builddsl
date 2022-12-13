@@ -569,11 +569,11 @@ that does not require prefixing members of the closure target with <code>self</c
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># $ python -m builddsl hello.build -E -C | grep -v -e &#39;^$&#39;</span>
-<span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+<span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
 <span class="k">def</span> <span class="nf">_closure_1</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="bp">self</span><span class="p">(</span><span class="s1">&#39;World!&#39;</span><span class="p">)</span>
 <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;world&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_closure_1</span>
-<span class="nd">@__closure__</span><span class="o">.</span><span class="n">child</span>
+<span class="nd">@__closure__</span><span class="o">.</span><span class="n">subclosure</span>
 <span class="k">def</span> <span class="nf">_closure_2</span><span class="p">(</span><span class="vm">__closure__</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;print&#39;</span><span class="p">](</span><span class="s1">&#39;Hello,&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 <span class="vm">__closure__</span><span class="p">[</span><span class="s1">&#39;world&#39;</span><span class="p">](</span><span class="n">_closure_2</span><span class="p">)</span>
