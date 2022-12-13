@@ -16,24 +16,24 @@ Homepage = "https://github.com/NiklasRosenstein/python-builddsl"
 Documentation = "https://niklasrosenstein.github.io/python-builddsl/"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-"nr.util" = ">=0.7.0,<1.0.0"
-termcolor = "^1.1.0"
+python = "^3.6"
 typing-extensions = ">=3.0.0"
-# dataclasses = {version="^0.6", python="~3.6"}
+nr-io-lexer = "^1.0.0"
+dataclasses = { version = "^0.6", python = "<3.7" }
 
 [tool.poetry.extras]
 astor = ['astor ^0.8.1']
 
 [tool.poetry.dev-dependencies]
+astor = "^0.8.1"
 black = "*"
 flake8 = "*"
 isort = "*"
 mypy = "*"
 pytest = "*"
+termcolor = ">=1.1.0,<3.0.0"
 types-termcolor = "*"
-# types-dataclasses = {version="*", python="~3.6"}
-astor = "^0.8.1"
+types-dataclasses = "*"
 
 [tool.slap]
 typed = true

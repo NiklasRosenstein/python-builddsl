@@ -4,17 +4,22 @@ name resolution when enabling #TranspileOptions.closure_target.
 """
 
 import builtins
+import enum
 import functools
 import sys
 import types
 import typing as t
 
 import typing_extensions as te
-from nr.util.singleton import NotSet
 
 from ._transpiler import TranspileOptions, transpile_to_ast
 
 # import weakref
+
+
+class NotSet(enum.Enum):
+    Value = 1
+
 
 undefined = NotSet.Value
 
@@ -81,7 +86,7 @@ class MapContext(Context):
     Delegates dynamic name resolution to a mapping.
     """
 
-    def __init__(self, target: t.MutableMapping, description: str) -> None:
+    def __init__(self, target: t.MutableMapping[str, t.Any], description: str) -> None:
         self._target = target
         self._description = description
 
@@ -114,7 +119,7 @@ class ChainContext(Context):
     def __init__(self, *contexts: Context) -> None:
         self._contexts = contexts
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> t.Any:
         for ctx in self._contexts:
             try:
                 return ctx[key]
@@ -122,7 +127,7 @@ class ChainContext(Context):
                 pass
         raise NameError(key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: t.Any) -> None:
         for ctx in self._contexts:
             try:
                 ctx[key] = value
@@ -131,7 +136,7 @@ class ChainContext(Context):
                 pass
         raise NameError(key)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         for ctx in self._contexts:
             try:
                 del ctx[key]
@@ -207,7 +212,7 @@ class Closure(Context):
     def frame(self) -> t.Optional[types.FrameType]:
         return self._frame
 
-    def child(self, func: t.Callable, frame: t.Optional[types.FrameType] = None) -> t.Callable:
+    def child(self, func: t.Callable[..., t.Any], frame: t.Optional[types.FrameType] = None) -> t.Callable[..., t.Any]:
 
         if frame is None:
             frame = sys._getframe(1)
@@ -215,7 +220,7 @@ class Closure(Context):
         del frame
 
         @functools.wraps(func)
-        def _wrapper(*args, **kwargs):
+        def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
             __closure__ = Closure(self, closure.frame, args[0], self._context_factory) if args else closure
             return func(__closure__, *args, **kwargs)
 

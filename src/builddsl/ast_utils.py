@@ -122,6 +122,3 @@ class DynamicLookupRewriter(ast.NodeTransformer):
     def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.AST:
         self.visit_Import(ast.Import(names=node.names))  # Dispatch name detection
         return self.generic_visit(node)
-
-    def visit(self, node: T_AST) -> T_AST:
-        return super().visit(node)

@@ -12,7 +12,7 @@ parser.add_argument("-E", "--transpile", action="store_true")
 parser.add_argument("-C", "--enable-closures", action="store_true")
 
 
-def main():
+def main() -> None:
     args = parser.parse_args()
 
     if args.transpile:

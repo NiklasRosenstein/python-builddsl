@@ -11,7 +11,7 @@ import sys
 import typing as t
 from dataclasses import dataclass
 
-from nr.util.parsing import Cursor, ProxyToken as _ProxyToken, RuleSet, Tokenizer, rules
+from nr.io.lexer import Cursor, ProxyToken as _ProxyToken, RuleSet, Tokenizer, rules
 
 try:
     from termcolor import colored
@@ -99,7 +99,7 @@ rule_set.rule(Token.Literal, rules.string_literal())
 rule_set.rule(Token.Control, rules.regex_extract("|".join(map(re.escape, _ALL_CONTROL_CHARACTERS))))
 
 
-class ProxyToken(_ProxyToken):
+class ProxyToken(_ProxyToken[Token, str]):
     """
     Extension class that adds some useful utility methods to test the contents of the token.
     """
@@ -229,7 +229,7 @@ class Rewriter:
         closure_state = self._closure_counter, self._closures.copy(), self._closure_stack[:]
         do_restore = True
 
-        def commit():
+        def commit() -> None:
             nonlocal do_restore
             do_restore = False
 

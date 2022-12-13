@@ -86,7 +86,7 @@ def transpile_to_source(code: str, filename: str, options: t.Optional[TranspileO
 
     from astor import to_source  # type: ignore
 
-    return to_source(transpile_to_ast(code, filename, options))
+    return to_source(transpile_to_ast(code, filename, options))  # type: ignore[no-any-return]
 
 
 class ClosureRewriter(ast.NodeTransformer):
