@@ -634,7 +634,7 @@ the subscript being treated as a separate argument.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_closure_1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arguments</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarguments</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Hello,&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-<span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_closure_1</span><span class="p">[</span><span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;World&#39;</span><span class="p">]))</span>
+<span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_closure_1</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;World&#39;</span><span class="p">]))</span>
 </code></pre></div>
 </div>
 </div>
