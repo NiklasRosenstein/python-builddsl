@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import ast
 import contextlib
 import dataclasses
@@ -28,7 +26,7 @@ class DynamicLookupRewriter(ast.NodeTransformer):
 
     #: A prefix to compare variable names for which, if it matches, they will not be replaced
     #: with a dynamic lookup, but instead the prefix will be trimmed.
-    ignore_prefix: str | None = None
+    ignore_prefix: "str | None" = None
 
     def __post_init__(self) -> None:
         self._locals: t.List[t.Set[str]] = [set()]
