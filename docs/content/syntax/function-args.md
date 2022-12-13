@@ -69,5 +69,5 @@ Keyword arguments may be specified using colons (`:`) instead of equal signs (`=
     def _closure_1(self, *arguments, **kwarguments):
         print('Hello,', self)
 
-    list(map(_closure_1['John', 'World']))
+    list(map(_closure_1, ['John', 'World']))
     ```
