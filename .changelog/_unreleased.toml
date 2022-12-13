@@ -3,3 +3,9 @@ id = "e676844a-624a-4709-b01b-74499cda90a3"
 type = "feature"
 description = "add `UnboundClosure` intermediate type"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "80111d80-cf49-4187-9562-a77890d20a07"
+type = "breaking change"
+description = "Rename from craftr-dsl to builddsl"
+author = "@NiklasRosenstein"
