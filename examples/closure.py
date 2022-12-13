@@ -8,7 +8,7 @@ class HelloSayer:
         closure(self)
 
     def to(self, name: str) -> None:
-        print("Hello, World!")
+        print(f"Hello, {name}!")
 
 
 def main() -> None:
