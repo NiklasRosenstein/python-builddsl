@@ -246,6 +246,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#projects-using-builddsl" class="md-nav__link">
     Projects using BuildDSL
   </a>
@@ -528,6 +535,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#quickstart" class="md-nav__link">
+    Quickstart
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#projects-using-builddsl" class="md-nav__link">
     Projects using BuildDSL
   </a>
@@ -555,14 +569,38 @@
 
 
 <h1 id="welcome-to-the-builddsl-documentation">Welcome to the BuildDSL documentation!</h1>
-<p>A superset of the Python programming language with support for closures and multi-line lambdas.</p>
-<p>BuildDSL is an "almost superset" of Python 3; adding a lot of syntactical features that make it more
-convenient to describe build configurations at the cost of some other syntax features of the native Python
-language (like set literals).</p>
+<p>BuildDSL is (almost) a superset of the Python programming language that adds additional syntactical and semantical
+features that are strongly inspired by the <a href="https://docs.gradle.org/current/dsl/index.html">Gradle DSL</a>.</p>
+<ul>
+<li>Multi-line lambdas</li>
+<li>Closures with dynamic name resolution (optional feature)</li>
+<li>Parentheses-less function calls (top-level only)</li>
+<li>Optional comma separation in function arguments</li>
+</ul>
 <h2 id="installation">Installation</h2>
 <div class="highlight"><pre><span></span><code>$ pip install builddsl
 </code></pre></div>
-<p>The <code>builddsl</code> package requires at least Python 3.8.</p>
+<p>The <code>builddsl</code> package requires at least Python 3.6.</p>
+<h2 id="quickstart">Quickstart</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">builddsl</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">get_name</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span> <span class="n">get_name</span><span class="p">())</span>
+
+<span class="n">context</span> <span class="o">=</span> <span class="n">builddsl</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">builddsl</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">mutable_mapping</span><span class="p">({</span><span class="s2">&quot;hello&quot;</span><span class="p">:</span> <span class="n">hello</span><span class="p">}),</span>
+    <span class="n">closures_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">context</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">hello {</span>
+<span class="s2">    return &quot;World&quot;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># prints: &quot;Hello, World&quot;</span>
+</code></pre></div>
 <h2 id="projects-using-builddsl">Projects using BuildDSL</h2>
 <ul>
 <li><a href="https://niklasrosenstein.github.io/novella/">Novella</a></li>
