@@ -1,0 +1,5 @@
+[[entries]]
+id = "56ab1908-cec0-43cc-b33d-2229142d71f5"
+type = "breaking change"
+description = "rework public API"
+author = "@NiklasRosenstein"
