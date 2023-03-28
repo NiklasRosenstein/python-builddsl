@@ -3,3 +3,9 @@ id = "56ab1908-cec0-43cc-b33d-2229142d71f5"
 type = "breaking change"
 description = "rework public API"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ce850e10-89d4-4173-8f16-df39258bbd8b"
+type = "improvement"
+description = "Fix pyproject.toml to support NIX"
+author = "szymon.gula@helsing.ai"
