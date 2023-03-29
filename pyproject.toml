@@ -25,6 +25,9 @@ astor = { version = "^0.8.1", optional = true }
 [tool.poetry.extras]
 astor = ["astor"]
 
+[tool.poetry.scripts]
+builddsk = "builddsl.wrapper.__main__:main"
+
 [tool.poetry.dev-dependencies]
 astor = "^0.8.1"
 black = "*"
