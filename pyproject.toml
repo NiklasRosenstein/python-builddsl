@@ -20,9 +20,10 @@ python = "^3.6"
 typing-extensions = ">=3.0.0"
 nr-io-lexer = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
+astor = { version = "^0.8.1", optional = true }
 
 [tool.poetry.extras]
-astor = ['astor ^0.8.1']
+astor = ["astor"]
 
 [tool.poetry.dev-dependencies]
 astor = "^0.8.1"

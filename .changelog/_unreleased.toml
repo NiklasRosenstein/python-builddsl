@@ -1,0 +1,5 @@
+[[entries]]
+id = "92519461-4069-436c-a576-ed65e65cc5fd"
+type = "improvement"
+description = "Fix pyproject.toml to support NIX"
+author = "szymon.gula@helsing.ai"

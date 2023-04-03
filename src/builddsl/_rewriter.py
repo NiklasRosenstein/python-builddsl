@@ -393,7 +393,6 @@ class Rewriter:
             is_delimited = True
 
             while token.tv != (Token.Control, ")"):
-
                 if (
                     not is_delimited  # Token is not preceeded by an opening parentheses or comma.
                     or token.type != Token.Name
