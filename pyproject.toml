@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "builddsl"
-version = "1.0.0"
+version = "1.0.1"
 description = "A superset of the Python programming language with support for closures and multi-line lambdas."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
