@@ -21,7 +21,7 @@ except ImportError:
         return str(s)
 
 
-from ._util import debug_trace
+from builddsl.util import debug_trace
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class Grammar:
 
     #: Whether the `def varname = ...` syntax is allowed and understood. This is an important
     #: syntax feature when enabling the #NameRewriter with #TranspileOptions.closure_target.
-    local_def: bool = False
+    local_def: bool = True
 
     #: The keyword for local definitions.
     local_keyword: str = "def"

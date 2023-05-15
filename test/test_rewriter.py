@@ -2,7 +2,7 @@
 from pathlib import Path
 
 import pytest
-from builddsl._rewriter import Rewriter, SyntaxError
+from builddsl.rewriter import Rewriter, SyntaxError
 
 from .utils.testcaseparser import CaseData, cases_from
 
