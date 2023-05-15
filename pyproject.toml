@@ -20,10 +20,6 @@ python = "^3.6"
 typing-extensions = ">=3.0.0"
 nr-io-lexer = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
-astor = { version = "^0.8.1", optional = true }
-
-[tool.poetry.extras]
-astor = ["astor"]
 
 [tool.poetry.dev-dependencies]
 astor = "^0.8.1"
@@ -35,6 +31,12 @@ pytest = "*"
 termcolor = ">=1.1.0,<3.0.0"
 types-termcolor = "*"
 types-dataclasses = "*"
+
+[tool.poetry.group.astor]
+optional = true
+
+[tool.poetry.group.astor.dependencies]
+astor = "^0.8.1"
 
 [tool.slap]
 typed = true
